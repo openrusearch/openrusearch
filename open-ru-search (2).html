@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Ru Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-900:#0B2545;
+    --blue-700:#134E9B;
+    --blue-500:#1C6FD6;
+    --blue-100:#EAF2FC;
+    --paper:#FBFCFE;
+    --ink:#16233A;
+    --ink-soft:#5C6B85;
+    --line:#DCE7F7;
+    --radius:16px;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{
+    font-family:'Inter', system-ui, sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .topbar{
+    background:var(--blue-900);
+    color:#fff;
+    padding:10px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:13px;
+  }
+  .topbar .brandmark{
+    font-family:'Manrope', sans-serif;
+    font-weight:800;
+    letter-spacing:.2px;
+  }
+  .topbar .brandmark b{ color:#FF7A29; }
+  .topbar nav a{
+    color:#B9D3F5;
+    text-decoration:none;
+    margin-left:18px;
+    font-weight:500;
+  }
+  .topbar nav a:hover{ color:#fff; }
+
+  .hero{
+    background:linear-gradient(180deg, var(--blue-700) 0%, var(--blue-500) 100%);
+    padding:56px 20px 90px;
+    text-align:center;
+    color:#fff;
+    position:relative;
+  }
+  .hero h1{
+    font-family:'Manrope', sans-serif;
+    font-size:44px;
+    font-weight:800;
+    letter-spacing:-.5px;
+  }
+  .hero h1 .tag{
+    display:inline-block;
+    background:#FF7A29;
+    color:#fff;
+    font-size:14px;
+    font-weight:700;
+    padding:3px 12px;
+    border-radius:20px;
+    vertical-align:middle;
+    margin-left:8px;
+    border:1px solid rgba(255,255,255,.3);
+    transform:translateY(-6px);
+  }
+  .hero p{
+    margin-top:10px;
+    color:#D6E7FC;
+    font-size:15px;
+  }
+
+  .search-wrap{
+    max-width:680px;
+    margin:34px auto 0;
+    position:relative;
+  }
+  .search-box{
+    background:#fff;
+    border-radius:999px;
+    display:flex;
+    align-items:center;
+    padding:6px 6px 6px 22px;
+    box-shadow:0 18px 40px rgba(11,37,69,.35);
+  }
+  .search-box input{
+    flex:1;
+    border:none;
+    outline:none;
+    font-size:16px;
+    padding:12px 8px;
+    color:var(--ink);
+    background:transparent;
+  }
+  .search-box input::placeholder{ color:#9DB2CE; }
+  .search-box button{
+    background:var(--blue-700);
+    color:#fff;
+    border:none;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:13px 26px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:transform .15s, background .15s;
+    white-space:nowrap;
+  }
+  .search-box button:hover{ background:var(--blue-900); transform:scale(1.03); }
+
+  .quick-row{
+    margin-top:16px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .quick-row span{
+    background:rgba(255,255,255,.14);
+    color:#fff;
+    font-size:12.5px;
+    padding:6px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,.25);
+  }
+  .quick-row span:hover{ background:rgba(255,255,255,.24); }
+
+  .content{
+    max-width:920px;
+    width:100%;
+    margin:-46px auto 0;
+    padding:0 20px 60px;
+    flex:1;
+  }
+
+  .panel{
+    background:#fff;
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    box-shadow:0 4px 24px rgba(11,37,69,.06);
+    padding:26px 26px 24px;
+    margin-bottom:22px;
+  }
+  .panel-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .panel-head h2{
+    font-family:'Manrope', sans-serif;
+    font-size:18px;
+    font-weight:700;
+  }
+  .panel-head span{
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+
+  .quick-row span.pin-btn{
+    background:rgba(255,255,255,.1);
+    border-style:dashed;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;
+    padding:6px;
+  }
+  .quick-row span.pin-btn:hover{ background:rgba(255,255,255,.24); }
+  .quick-row span.pinned-item{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .quick-row span.pinned-item .unpin-x{
+    opacity:.7;
+    font-weight:700;
+  }
+  .quick-row span.pinned-item .unpin-x:hover{ opacity:1; }
+
+  .region-filter{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .region-chip{
+    background:var(--blue-100);
+    color:var(--blue-700);
+    font-size:12.5px;
+    font-weight:600;
+    padding:6px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    border:1px solid var(--line);
+  }
+  .region-chip:hover{ background:#fff; border-color:var(--blue-500); }
+  .region-chip.active{
+    background:var(--blue-700);
+    color:#fff;
+    border-color:var(--blue-700);
+  }
+
+  .engine-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+    gap:12px;
+  }
+  .engine-card{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 14px 13px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--blue-100);
+    transition:border-color .15s, transform .12s, background .15s;
+    text-align:left;
+  }
+  .engine-card:hover{
+    border-color:var(--blue-500);
+    background:#fff;
+    transform:translateY(-2px);
+  }
+  .engine-card.active{
+    border-color:var(--blue-500);
+    background:#fff;
+    box-shadow:0 0 0 2px var(--blue-500) inset;
+  }
+  .engine-dot{
+    width:34px; height:34px;
+    border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    background:#fff;
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .engine-dot img{
+    width:22px; height:22px;
+    object-fit:contain;
+  }
+  .engine-name{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .engine-region{
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+
+  .selected-note{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:14px;
+  }
+  .selected-note b{ color:var(--blue-700); }
+
+  .go-all{
+    margin-top:16px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .go-all button{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    padding:11px 20px;
+    border-radius:10px;
+    cursor:pointer;
+    border:none;
+  }
+  .btn-primary{ background:var(--blue-700); color:#fff; }
+  .btn-primary:hover{ background:var(--blue-900); }
+
+  .hint{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.6;
+  }
+  .hint strong{ color:var(--ink); }
+  .hint a{ color:var(--blue-700); }
+
+  .wiki-results{
+    margin-top:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .wiki-item{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    background:var(--blue-100);
+    text-decoration:none;
+    color:inherit;
+    display:block;
+    transition:border-color .15s, background .15s;
+  }
+  .wiki-item:hover{ border-color:var(--blue-500); background:#fff; }
+  .wiki-item .wiki-title{
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--blue-700);
+    margin-bottom:4px;
+  }
+  .wiki-item .wiki-snippet{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+  .wiki-item .wiki-snippet mark{
+    background:none;
+    color:var(--ink);
+    font-weight:700;
+  }
+  .wiki-empty, .wiki-loading{
+    font-size:13px;
+    color:var(--ink-soft);
+    padding:10px 2px;
+  }
+
+  .misc-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+    gap:12px;
+  }
+  .misc-card{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 14px 13px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--blue-100);
+    transition:border-color .15s, transform .12s, background .15s;
+    text-align:left;
+    text-decoration:none;
+    color:inherit;
+  }
+  .misc-card:hover{
+    border-color:var(--blue-500);
+    background:#fff;
+    transform:translateY(-2px);
+  }
+  .misc-dot{
+    width:34px; height:34px;
+    border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    background:#fff;
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .misc-dot img{ width:22px; height:22px; object-fit:contain; }
+  .misc-name{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .misc-sub{
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+
+  .wiki-modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,37,69,.55);
+    z-index:100;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 20px;
+    overflow-y:auto;
+  }
+  .wiki-modal-overlay.show{ display:flex; }
+  .wiki-modal{
+    background:#fff;
+    border-radius:var(--radius);
+    max-width:640px;
+    width:100%;
+    box-shadow:0 30px 60px rgba(11,37,69,.4);
+    overflow:hidden;
+  }
+  .wiki-modal-head{
+    background:var(--blue-700);
+    color:#fff;
+    padding:16px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .wiki-modal-head h3{
+    font-family:'Manrope', sans-serif;
+    font-size:16px;
+    font-weight:700;
+  }
+  .wiki-modal-close{
+    background:rgba(255,255,255,.18);
+    border:none;
+    color:#fff;
+    width:28px; height:28px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    line-height:1;
+  }
+  .wiki-modal-close:hover{ background:rgba(255,255,255,.3); }
+  .wiki-modal-body{
+    padding:18px 22px 22px;
+    max-height:70vh;
+    overflow-y:auto;
+  }
+
+  .footer{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:12px;
+    padding:18px 0 26px;
+  }
+
+  @media (max-width:560px){
+    .hero h1{ font-size:30px; }
+    .hero h1 .tag{ display:block; margin:8px auto 0; transform:none; width:fit-content; }
+    .search-box{ flex-wrap:nowrap; padding-left:16px; }
+    .search-box input{ font-size:14px; }
+    .search-box button{ padding:11px 16px; font-size:13px; }
+    .engine-grid{ grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brandmark" id="brandText" style="cursor:pointer;" title="Вернуться к обычному поиску">Open <b>Ru</b> Search</div>
+  <nav>
+    <a href="https://github.com/ARTEMPRO01MINETEXNICK" target="_blank" rel="noopener">Разработчик</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <h1 id="heroTitle">Open Ru Search<span class="tag">launcher</span></h1>
+  <p id="heroSub">Один запрос — в выбранный вами поисковик</p>
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <input type="text" id="queryInput" placeholder="Что будем искать?" autofocus>
+      <button id="mainSearchBtn">Искать</button>
+    </div>
+  </div>
+
+  <div class="quick-row" id="pinnedRow">
+    <span onclick="window.open('https://www.youtube.com','_blank')">youtube.com</span>
+  </div>
+  <div class="quick-row" id="backRow" style="display:none; margin-top:10px;">
+    <span id="backToBrowserBtn" style="background:#FF7A29; border-color:#FF7A29;">← Вернуться к обычному поиску</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Выберите поисковик</h2>
+      <span id="selCount">выбран: Google</span>
+    </div>
+    <div class="region-filter" id="regionFilter"></div>
+    <div class="engine-grid" id="engineGrid"></div>
+
+    <div class="go-all">
+      <button class="btn-primary" id="goSelected">Открыть поиск</button>
+    </div>
+
+    <p class="selected-note">Поисковик откроется в новой вкладке со страницей результатов по вашему запросу — вы увидите настоящую, полную выдачу выбранной системы, без ограничений и посредников.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Разное</h2>
+      <span>нейросети и вики-поиск</span>
+    </div>
+    <div class="misc-grid" id="miscGrid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Как это работает</h2></div>
+    <p class="hint">
+      <strong>Open Ru Search</strong> — это лаунчер, а не отдельная поисковая база: браузер не может законно и технически получить полную выдачу чужого поисковика напрямую в свою страницу (это ограничение безопасности, которое действует для любого сайта, не только для этого). Поэтому вместо имитации результатов инструмент сразу отправляет ваш запрос в настоящую поисковую систему — так результаты всегда настоящие и актуальные. Исключение — Википедия: у неё есть открытый API, поэтому её результаты показываются прямо здесь, на странице.
+    </p>
+  </div>
+
+</div>
+
+
+<div class="wiki-modal-overlay" id="wikiModalOverlay">
+  <div class="wiki-modal">
+    <div class="wiki-modal-head">
+      <h3>Википедия</h3>
+      <button class="wiki-modal-close" id="wikiModalClose">✕</button>
+    </div>
+    <div class="wiki-modal-body" id="wikiResults"></div>
+  </div>
+</div>
+
+<script>
+  const engines = [
+    { id:'google',      name:'Google',       region:'Мир',    domain:'google.com',        url:q => `https://www.google.com/search?q=${q}` },
+    { id:'yandex',      name:'Яндекс',       region:'РФ',     domain:'yandex.ru',          url:q => `https://yandex.ru/search/?text=${q}` },
+    { id:'bing',        name:'Bing',         region:'Мир',    domain:'bing.com',           url:q => `https://www.bing.com/search?q=${q}` },
+    { id:'ddg',         name:'DuckDuckGo',   region:'Мир',    domain:'duckduckgo.com',     url:q => `https://duckduckgo.com/?q=${q}` },
+    { id:'mailru',      name:'Mail.ru',      region:'РФ',     domain:'mail.ru',            url:q => `https://go.mail.ru/search?q=${q}` },
+    { id:'rambler',     name:'Rambler',      region:'РФ',     domain:'rambler.ru',         url:q => `https://nova.rambler.ru/search?query=${q}` },
+    { id:'nigma',       name:'Нигма',        region:'РФ',     domain:'nigma.ru',           url:q => `https://www.nigma.ru/index.php?s=${q}` },
+    { id:'gogo',        name:'Gogo.ru',      region:'РФ',     domain:'gogo.ru',            url:q => `https://gogo.ru/search?q=${q}` },
+    { id:'startpage',   name:'Startpage',    region:'Мир',    domain:'startpage.com',      url:q => `https://www.startpage.com/sp/search?query=${q}` },
+    { id:'ecosia',      name:'Ecosia',       region:'Мир',    domain:'ecosia.org',         url:q => `https://www.ecosia.org/search?q=${q}` },
+    { id:'brave',       name:'Brave Search', region:'Мир',    domain:'search.brave.com',   url:q => `https://search.brave.com/search?q=${q}` },
+    { id:'qwant',       name:'Qwant',        region:'Европа', domain:'qwant.com',          url:q => `https://www.qwant.com/?q=${q}` },
+    { id:'baidu',       name:'Baidu',        region:'Китай',  domain:'baidu.com',          url:q => `https://www.baidu.com/s?wd=${q}` },
+    { id:'yahoo',       name:'Yahoo',        region:'Мир',    domain:'search.yahoo.com',   url:q => `https://search.yahoo.com/search?p=${q}` },
+    { id:'naver',       name:'Naver',        region:'Корея',  domain:'naver.com',          url:q => `https://search.naver.com/search.naver?query=${q}` },
+    { id:'seznam',      name:'Seznam',       region:'Чехия',  domain:'seznam.cz',          url:q => `https://search.seznam.cz/?q=${q}` },
+    { id:'sogou',       name:'Sogou',        region:'Китай',  domain:'sogou.com',          url:q => `https://www.sogou.com/web?query=${q}` },
+    { id:'ask',         name:'Ask.com',      region:'Мир',    domain:'ask.com',            url:q => `https://www.ask.com/web?q=${q}` },
+    { id:'aol',         name:'AOL',          region:'Мир',    domain:'search.aol.com',     url:q => `https://search.aol.com/aol/search?q=${q}` },
+    { id:'coccoc',      name:'Coc Coc',      region:'Вьетнам',domain:'coccoc.com',         url:q => `https://coccoc.com/search?query=${q}` },
+    { id:'presearch',   name:'Presearch',    region:'Мир',    domain:'presearch.com',      url:q => `https://presearch.com/search?q=${q}` },
+    { id:'swisscows',   name:'Swisscows',    region:'Европа', domain:'swisscows.com',      url:q => `https://swisscows.com/en/web?query=${q}` },
+    { id:'mojeek',      name:'Mojeek',       region:'Мир',    domain:'mojeek.com',         url:q => `https://www.mojeek.com/search?q=${q}` },
+  ];
+
+  let selected = 'google';
+  let activeRegion = 'Все';
+
+  const grid = document.getElementById('engineGrid');
+  const regionFilter = document.getElementById('regionFilter');
+  const selCount = document.getElementById('selCount');
+  const input = document.getElementById('queryInput');
+
+  const regions = ['Все', ...Array.from(new Set(engines.map(e => e.region)))];
+
+  function renderRegionFilter(){
+    regionFilter.innerHTML = '';
+    regions.forEach(r => {
+      const chip = document.createElement('div');
+      chip.className = 'region-chip' + (activeRegion === r ? ' active' : '');
+      chip.textContent = r;
+      chip.addEventListener('click', () => {
+        activeRegion = r;
+        renderRegionFilter();
+        renderGrid();
+      });
+      regionFilter.appendChild(chip);
+    });
+  }
+
+  function renderGrid(){
+    grid.innerHTML = '';
+    const list = activeRegion === 'Все' ? engines : engines.filter(e => e.region === activeRegion);
+    list.forEach(e => {
+      const card = document.createElement('div');
+      card.className = 'engine-card' + (selected === e.id ? ' active' : '');
+      card.innerHTML = `
+        <div class="engine-dot"><img src="https://www.google.com/s2/favicons?sz=64&domain=${e.domain}" alt=""></div>
+        <div>
+          <div class="engine-name">${e.name}</div>
+          <div class="engine-region">${e.region}</div>
+        </div>
+      `;
+      card.addEventListener('click', () => {
+        selected = e.id;
+        try{ localStorage.setItem('ors_selected_engine', selected); }catch(err){}
+        renderGrid();
+      });
+      grid.appendChild(card);
+    });
+    const current = engines.find(e => e.id === selected);
+    selCount.textContent = `выбран: ${current ? current.name : '—'}`;
+  }
+
+  function setQuery(text){
+    input.value = text;
+    input.focus();
+  }
+
+  let mode = 'normal'; // 'normal' | 'wiki'
+
+  function setMode(newMode){
+    mode = newMode;
+    const brandText = document.getElementById('brandText');
+    const heroTitle = document.getElementById('heroTitle');
+    const heroSub = document.getElementById('heroSub');
+    const backRow = document.getElementById('backRow');
+    if (mode === 'wiki'){
+      brandText.innerHTML = 'Вики <b>Поиск</b>';
+      heroTitle.innerHTML = 'Вики Поиск<span class="tag">launcher</span>';
+      heroSub.textContent = 'Один запрос — сразу статьи из Википедии';
+      input.placeholder = 'Что ищем в Википедии?';
+      backRow.style.display = 'flex';
+    } else {
+      brandText.innerHTML = 'Open <b>Ru</b> Search';
+      heroTitle.innerHTML = 'Open Ru Search<span class="tag">launcher</span>';
+      heroSub.textContent = 'Один запрос — в выбранный вами поисковик';
+      input.placeholder = 'Что будем искать?';
+      backRow.style.display = 'none';
+    }
+    try{ localStorage.setItem('ors_mode', mode); }catch(e){}
+  }
+
+  function isLikelyDomain(text){
+    const t = text.trim();
+    if (/\s/.test(t)) return false;
+    return /^(https?:\/\/)?([a-zа-я0-9-]+\.)+[a-zа-я]{2,}(\/.*)?$/i.test(t);
+  }
+
+  function openSearch(){
+    const q = input.value.trim();
+    if (!q) { input.focus(); return; }
+    if (mode === 'wiki'){
+      searchWikipedia(q);
+      showWikiModal();
+      return;
+    }
+    if (isLikelyDomain(q)){
+      let url = q;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      window.open(url, '_blank');
+      return;
+    }
+    const encoded = encodeURIComponent(q);
+    const engine = engines.find(e => e.id === selected);
+    if (!engine) return;
+    window.open(engine.url(encoded), '_blank');
+    searchWikipedia(q);
+    showWikiModal();
+  }
+
+  const wikiResults = document.getElementById('wikiResults');
+  const wikiModalOverlay = document.getElementById('wikiModalOverlay');
+
+  function showWikiModal(){
+    wikiModalOverlay.classList.add('show');
+  }
+  function hideWikiModal(){
+    wikiModalOverlay.classList.remove('show');
+  }
+  document.getElementById('wikiModalClose').addEventListener('click', hideWikiModal);
+  wikiModalOverlay.addEventListener('click', e => {
+    if (e.target === wikiModalOverlay) hideWikiModal();
+  });
+
+  async function searchWikipedia(query){
+    if (query.trim().toLowerCase() === 'open ru search'){
+      wikiResults.innerHTML = `
+        <div class="wiki-item" style="cursor:default;">
+          <div class="wiki-title">Хах</div>
+          <div class="wiki-snippet">я не думал что ты нас будешь искать...</div>
+        </div>
+      `;
+      return;
+    }
+    wikiResults.innerHTML = '<p class="wiki-loading">Ищем в Википедии…</p>';
+    try{
+      const url = `https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*&srlimit=8`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      const items = (data.query && data.query.search) || [];
+
+      if (items.length === 0){
+        wikiResults.innerHTML = '<p class="wiki-empty">Ничего не найдено в Википедии по этому запросу.</p>';
+        return;
+      }
+
+      wikiResults.innerHTML = '';
+      items.forEach(item => {
+        const link = document.createElement('a');
+        link.className = 'wiki-item';
+        link.href = `https://ru.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        const cleanSnippet = item.snippet
+          .replace(/<span class="searchmatch">/g, '<mark>')
+          .replace(/<\/span>/g, '</mark>');
+        link.innerHTML = `
+          <div class="wiki-title">${item.title}</div>
+          <div class="wiki-snippet">${cleanSnippet}…</div>
+        `;
+        wikiResults.appendChild(link);
+      });
+    }catch(err){
+      wikiResults.innerHTML = '';
+    }
+  }
+
+  document.getElementById('mainSearchBtn').addEventListener('click', openSearch);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') openSearch(); });
+  document.getElementById('goSelected').addEventListener('click', openSearch);
+
+  const miscItems = [
+    { name:'Вики Поиск',  sub:'результаты выше',   domain:'wikipedia.org',  action:'scroll' },
+    { name:'DeepSeek',    sub:'нейросеть',          domain:'chat.deepseek.com', href:'https://chat.deepseek.com' },
+    { name:'Claude',      sub:'нейросеть',          domain:'claude.ai',      href:'https://claude.ai' },
+    { name:'Arena AI',    sub:'сравнение моделей',  domain:'lmarena.ai',     href:'https://lmarena.ai' },
+    { name:'ChatGPT',     sub:'нейросеть',          domain:'chatgpt.com',    href:'https://chatgpt.com' },
+  ];
+
+  function renderMisc(){
+    const miscGrid = document.getElementById('miscGrid');
+    miscGrid.innerHTML = '';
+    miscItems.forEach(item => {
+      const el = document.createElement(item.action === 'scroll' ? 'div' : 'a');
+      el.className = 'misc-card';
+      if (item.action !== 'scroll'){
+        el.href = item.href;
+        el.target = '_blank';
+        el.rel = 'noopener';
+      } else {
+        el.addEventListener('click', () => {
+          setMode('wiki');
+          input.focus();
+        });
+      }
+      el.innerHTML = `
+        <div class="misc-dot"><img src="https://www.google.com/s2/favicons?sz=64&domain=${item.domain}" alt=""></div>
+        <div>
+          <div class="misc-name">${item.name}</div>
+          <div class="misc-sub">${item.sub}</div>
+        </div>
+      `;
+      miscGrid.appendChild(el);
+    });
+  }
+
+  renderMisc();
+  renderRegionFilter();
+  renderGrid();
+
+  document.getElementById('brandText').addEventListener('click', () => {
+    setMode(mode === 'wiki' ? 'normal' : 'wiki');
+    input.focus();
+  });
+
+  document.getElementById('backToBrowserBtn').addEventListener('click', () => {
+    setMode('normal');
+    input.focus();
+  });
+
+  try{
+    const savedEngine = localStorage.getItem('ors_selected_engine');
+    if (savedEngine && engines.some(e => e.id === savedEngine)){
+      selected = savedEngine;
+    }
+    const savedMode = localStorage.getItem('ors_mode');
+    if (savedMode === 'wiki'){
+      setMode('wiki');
+    }
+  }catch(e){}
+  renderGrid();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const qParam = urlParams.get('q');
+  if (qParam){
+    input.value = qParam;
+  }
+</script>
+
+</body>
+</html>
