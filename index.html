@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
 <title>Open Ru Search</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     color-scheme:light;
@@ -39,7 +37,7 @@
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
   body{
-    font-family:'Inter', system-ui, sans-serif;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     background:var(--paper);
     color:var(--ink);
     min-height:100vh;
@@ -57,7 +55,6 @@
     font-size:13px;
   }
   .topbar .brandmark{
-    font-family:'Manrope', sans-serif;
     font-weight:800;
     letter-spacing:.2px;
     color:#FF7A29;
@@ -227,7 +224,6 @@
     border-radius:8px;
     padding:6px 8px;
     font-size:12.5px;
-    font-family:'Inter', sans-serif;
     color:var(--ink);
     outline:none;
     min-width:0;
@@ -237,7 +233,6 @@
     background:var(--blue-700);
     color:#fff;
     border:none;
-    font-family:'Inter', sans-serif;
     font-weight:600;
     font-size:12.5px;
     padding:7px 14px;
@@ -267,7 +262,6 @@
     box-shadow:0 30px 60px rgba(11,37,69,.4);
   }
   .bg-confirm-box h3{
-    font-family:'Manrope', sans-serif;
     font-size:16px;
     margin-bottom:8px;
     color:var(--ink);
@@ -284,7 +278,6 @@
     justify-content:flex-end;
   }
   .bg-confirm-actions button{
-    font-family:'Inter', sans-serif;
     font-weight:600;
     font-size:13px;
     padding:9px 16px;
@@ -305,25 +298,11 @@
     position:relative;
   }
   .hero h1{
-    font-family:'Manrope', sans-serif;
     font-size:44px;
     font-weight:800;
     letter-spacing:-.5px;
     color:#FF7A29;
     transition:color .3s;
-  }
-  .hero h1 .tag{
-    display:inline-block;
-    background:#FF7A29;
-    color:#fff;
-    font-size:14px;
-    font-weight:700;
-    padding:3px 12px;
-    border-radius:20px;
-    vertical-align:middle;
-    margin-left:8px;
-    border:1px solid rgba(255,255,255,.3);
-    transform:translateY(-6px);
   }
   .hero p{
     margin-top:10px;
@@ -344,7 +323,6 @@
     gap:8px;
     background:var(--surface);
     color:var(--ink);
-    font-family:'Inter', sans-serif;
     font-weight:600;
     font-size:15px;
     padding:9px 20px 9px 14px;
@@ -357,16 +335,6 @@
   .mode-tab.active{
     border-color:var(--blue-900);
     background:var(--surface);
-  }
-  .mode-tab svg{ flex-shrink:0; }
-  .mode-tab .dot{
-    width:22px; height:22px;
-    border-radius:50%;
-    background:var(--blue-500);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
   }
 
   .search-wrap{
@@ -402,7 +370,6 @@
     background:var(--blue-700);
     color:#fff;
     border:none;
-    font-family:'Inter', sans-serif;
     font-weight:600;
     font-size:14px;
     padding:13px 26px;
@@ -457,7 +424,6 @@
     margin-bottom:16px;
   }
   .panel-head h2{
-    font-family:'Manrope', sans-serif;
     font-size:18px;
     font-weight:700;
     color:var(--ink);
@@ -508,7 +474,6 @@
     border-radius:999px;
     padding:6px 12px;
     font-size:12.5px;
-    font-family:'Inter', sans-serif;
     color:#16233A;
     outline:none;
     width:170px;
@@ -523,7 +488,6 @@
     font-size:12.5px;
     font-weight:600;
     cursor:pointer;
-    font-family:'Inter', sans-serif;
   }
   .quick-row .pin-save-btn:hover{ background:#e56a1d; }
   .pin-letter-icon{
@@ -537,7 +501,6 @@
     color:#fff;
     font-weight:800;
     font-size:11px;
-    font-family:'Manrope', sans-serif;
     flex-shrink:0;
     line-height:1;
   }
@@ -629,7 +592,6 @@
     flex-wrap:wrap;
   }
   .go-all button{
-    font-family:'Inter', sans-serif;
     font-weight:600;
     font-size:13.5px;
     padding:11px 20px;
@@ -646,14 +608,56 @@
     line-height:1.6;
   }
   .hint strong{ color:var(--ink); }
-  .hint a{ color:var(--blue-700); }
 
-  .wiki-results{
-    margin-top:16px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+  .wiki-modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,37,69,.55);
+    z-index:100;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 20px;
+    overflow-y:auto;
   }
+  .wiki-modal-overlay.show{ display:flex; }
+  .wiki-modal{
+    background:var(--surface);
+    border-radius:var(--radius);
+    max-width:640px;
+    width:100%;
+    box-shadow:0 30px 60px rgba(11,37,69,.4);
+    overflow:hidden;
+  }
+  .wiki-modal-head{
+    background:var(--blue-700);
+    color:#fff;
+    padding:16px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .wiki-modal-head h3{
+    font-size:16px;
+    font-weight:700;
+  }
+  .wiki-modal-close{
+    background:rgba(255,255,255,.18);
+    border:none;
+    color:#fff;
+    width:28px; height:28px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    line-height:1;
+  }
+  .wiki-modal-close:hover{ background:rgba(255,255,255,.3); }
+  .wiki-modal-body{
+    padding:18px 22px 22px;
+    max-height:70vh;
+    overflow-y:auto;
+  }
+
   .wiki-item{
     border:1px solid var(--line);
     border-radius:12px;
@@ -663,6 +667,7 @@
     color:inherit;
     display:block;
     transition:border-color .15s, background .15s;
+    margin-bottom:10px;
   }
   .wiki-item:hover{ border-color:var(--blue-500); background:var(--surface); }
   .wiki-item .wiki-title{
@@ -731,66 +736,8 @@
     color:var(--ink-soft);
   }
 
-  .wiki-modal-overlay{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(11,37,69,.55);
-    z-index:100;
-    align-items:flex-start;
-    justify-content:center;
-    padding:40px 20px;
-    overflow-y:auto;
-  }
-  .wiki-modal-overlay.show{ display:flex; }
-  .wiki-modal{
-    background:var(--surface);
-    border-radius:var(--radius);
-    max-width:640px;
-    width:100%;
-    box-shadow:0 30px 60px rgba(11,37,69,.4);
-    overflow:hidden;
-  }
-  .wiki-modal-head{
-    background:var(--blue-700);
-    color:#fff;
-    padding:16px 22px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-  }
-  .wiki-modal-head h3{
-    font-family:'Manrope', sans-serif;
-    font-size:16px;
-    font-weight:700;
-  }
-  .wiki-modal-close{
-    background:rgba(255,255,255,.18);
-    border:none;
-    color:#fff;
-    width:28px; height:28px;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:16px;
-    line-height:1;
-  }
-  .wiki-modal-close:hover{ background:rgba(255,255,255,.3); }
-  .wiki-modal-body{
-    padding:18px 22px 22px;
-    max-height:70vh;
-    overflow-y:auto;
-  }
-
-  .footer{
-    text-align:center;
-    color:var(--ink-soft);
-    font-size:12px;
-    padding:18px 0 26px;
-  }
-
   @media (max-width:560px){
     .hero h1{ font-size:30px; }
-    .hero h1 .tag{ display:block; margin:8px auto 0; transform:none; width:fit-content; }
     .search-box{ flex-wrap:nowrap; padding-left:16px; }
     .search-box input{ font-size:14px; }
     .search-box button{ padding:11px 16px; font-size:13px; }
@@ -909,7 +856,7 @@
       <button class="btn-primary" id="goSelected">Открыть поиск</button>
     </div>
 
-    <p class="selected-note">Поисковик откроется в новой вкладке со страницей результатов по вашему запросу — вы увидите настоящую, полную выдачу выбранной системы, без ограничений и посредников.</p>
+    <p class="selected-note">Поисковик откроется в новой вкладке со страницей результатов по вашему запросу.</p>
   </div>
 
   <div class="panel">
@@ -923,12 +870,11 @@
   <div class="panel">
     <div class="panel-head"><h2>Как это работает</h2></div>
     <p class="hint">
-      <strong>Open Ru Search</strong> — это лаунчер, а не отдельная поисковая база: браузер не может законно и технически получить полную выдачу чужого поисковика напрямую в свою страницу (это ограничение безопасности, которое действует для любого сайта, не только для этого). Поэтому вместо имитации результатов инструмент сразу отправляет ваш запрос в настоящую поисковую систему — так результаты всегда настоящие и актуальные. Исключение — Википедия: у неё есть открытый API, поэтому её результаты показываются прямо здесь, на странице.
+      <strong>Open Ru Search</strong> — это лаунчер, а не отдельная поисковая база: браузер не может законно и технически получить полную выдачу чужого поисковика напрямую в свою страницу. Поэтому вместо имитации результатов инструмент сразу отправляет ваш запрос в настоящую поисковую систему. Исключение — Википедия: у неё есть открытый API, поэтому её результаты показываются прямо здесь, на странице.
     </p>
   </div>
 
 </div>
-
 
 <div class="wiki-modal-overlay" id="wikiModalOverlay">
   <div class="wiki-modal">
@@ -942,7 +888,6 @@
 
 <script>
   const engines = [
-    // Мировые
     { id:'google',      name:'Google',       region:'Мир',    domain:'google.com',        url:q => `https://www.google.com/search?q=${q}` },
     { id:'bing',        name:'Bing',         region:'Мир',    domain:'bing.com',           url:q => `https://www.bing.com/search?q=${q}` },
     { id:'ddg',         name:'DuckDuckGo',   region:'Мир',    domain:'duckduckgo.com',     url:q => `https://duckduckgo.com/?q=${q}` },
@@ -952,20 +897,14 @@
     { id:'kagi',        name:'Kagi',         region:'Мир',    domain:'kagi.com',           url:q => `https://kagi.com/search?q=${q}` },
     { id:'yahoo',       name:'Yahoo',        region:'Мир',    domain:'search.yahoo.com',   url:q => `https://search.yahoo.com/search?p=${q}` },
     { id:'perplexity',  name:'Perplexity',   region:'Мир',    domain:'perplexity.ai',      url:q => `https://www.perplexity.ai/search?q=${q}` },
-
-    // Россия / СНГ
     { id:'yandex',      name:'Яндекс',       region:'РФ',     domain:'yandex.ru',          url:q => `https://yandex.ru/search/?text=${q}` },
     { id:'mailru',      name:'Mail.ru',      region:'РФ',     domain:'mail.ru',            url:q => `https://go.mail.ru/search?q=${q}` },
     { id:'rambler',     name:'Rambler',      region:'РФ',     domain:'rambler.ru',         url:q => `https://nova.rambler.ru/search?query=${q}` },
     { id:'gogo',        name:'Gogo.ru',      region:'РФ',     domain:'gogo.ru',            url:q => `https://gogo.ru/search?q=${q}` },
-
-    // Европа
     { id:'qwant',       name:'Qwant',        region:'Европа', domain:'qwant.com',          url:q => `https://www.qwant.com/?q=${q}` },
     { id:'ecosia',      name:'Ecosia',       region:'Европа', domain:'ecosia.org',         url:q => `https://www.ecosia.org/search?q=${q}` },
     { id:'seznam',      name:'Seznam',       region:'Европа', domain:'seznam.cz',          url:q => `https://search.seznam.cz/?q=${q}` },
     { id:'swisscows',   name:'Swisscows',    region:'Европа', domain:'swisscows.com',      url:q => `https://swisscows.com/en/web?query=${q}` },
-
-    // Азия
     { id:'baidu',       name:'Baidu',        region:'Азия',   domain:'baidu.com',          url:q => `https://www.baidu.com/s?wd=${q}` },
     { id:'naver',       name:'Naver',        region:'Азия',   domain:'naver.com',          url:q => `https://search.naver.com/search.naver?query=${q}` },
     { id:'sogou',       name:'Sogou',        region:'Азия',   domain:'sogou.com',          url:q => `https://www.sogou.com/web?query=${q}` },
@@ -974,6 +913,7 @@
 
   let selected = 'google';
   let activeRegion = 'Все';
+  let faviconTimer = null;
 
   const grid = document.getElementById('engineGrid');
   const regionFilter = document.getElementById('regionFilter');
@@ -999,17 +939,17 @@
 
   function renderGrid(){
     grid.innerHTML = '';
+    clearTimeout(faviconTimer);
+
     const list = activeRegion === 'Все' ? engines : engines.filter(e => e.region === activeRegion);
     list.forEach(e => {
       const card = document.createElement('div');
       card.className = 'engine-card' + (selected === e.id ? ' active' : '');
 
-      const iconHtml = e.id === 'bing'
-        ? `<span class="pin-letter-icon" style="width:22px;height:22px;border-radius:5px;font-size:14px;">B</span>`
-        : `<img src="https://www.google.com/s2/favicons?sz=64&domain=${e.domain}" alt="">`;
+      const letterHtml = `<span class="pin-letter-icon" style="width:22px;height:22px;border-radius:5px;font-size:14px;">${e.name[0]}</span>`;
 
       card.innerHTML = `
-        <div class="engine-dot">${iconHtml}</div>
+        <div class="engine-dot" data-engine-id="${e.id}">${letterHtml}</div>
         <div>
           <div class="engine-name">${e.name}</div>
           <div class="engine-region">${e.region}</div>
@@ -1024,16 +964,34 @@
     });
     const current = engines.find(e => e.id === selected);
     selCount.textContent = `выбран: ${current ? current.name : '—'}`;
+
+    faviconTimer = setTimeout(loadFavicons, 3000);
   }
 
-  function setQuery(text){
-    input.value = text;
-    input.focus();
+  function loadFavicons(){
+    if (input.value.trim()) return;
+    engines.forEach(e => {
+      const dot = grid.querySelector(`.engine-dot[data-engine-id="${e.id}"]`);
+      if (!dot) return;
+      const img = new Image();
+      img.src = `https://www.google.com/s2/favicons?sz=64&domain=${e.domain}`;
+      img.alt = '';
+      img.style.width = '22px';
+      img.style.height = '22px';
+      img.style.objectFit = 'contain';
+      img.onload = () => {
+        if (!input.value.trim()) {
+          dot.innerHTML = '';
+          dot.appendChild(img);
+        }
+      };
+    });
   }
 
-  /* ---------------------------------------------------------------
-     Pinned quick links (закреплённые быстрые ссылки)
-  --------------------------------------------------------------- */
+  input.addEventListener('input', () => {
+    clearTimeout(faviconTimer);
+  });
+
   const pinnedRow = document.getElementById('pinnedRow');
   const DEFAULT_PINNED = [
     { label:'youtube.com', url:'https://www.youtube.com' },
@@ -1055,13 +1013,6 @@
     try{ localStorage.setItem('ors_pinned', JSON.stringify(list)); }catch(e){}
   }
 
-  function getPinnedIcon(item){
-    if (item.url && item.url.includes('bing.com')){
-      return `<span class="pin-letter-icon">B</span>`;
-    }
-    return '';
-  }
-
   function renderPinned(){
     const list = getPinned();
     pinnedRow.innerHTML = '';
@@ -1072,7 +1023,6 @@
 
       if (pinnedEditMode){
         span.innerHTML = `
-          ${getPinnedIcon(item)}
           <span class="pin-label" style="cursor:default;">${item.label}</span>
           <span class="unpin-x" title="Удалить">✕</span>
         `;
@@ -1084,9 +1034,9 @@
           renderPinned();
         });
       } else {
-        span.innerHTML = `${getPinnedIcon(item)}<span class="pin-label">${item.label}</span>`;
+        span.innerHTML = `<span class="pin-label">${item.label}</span>`;
         span.querySelector('.pin-label').addEventListener('click', () => {
-          window.open(item.url, '_blank');
+          window.location.href = item.url;
         });
       }
       pinnedRow.appendChild(span);
@@ -1143,9 +1093,6 @@
     pinnedRow.appendChild(pencilBtn);
   }
 
-  /* ---------------------------------------------------------------
-     Mode handling
-  --------------------------------------------------------------- */
   let mode = 'normal';
 
   function applyModeUI(newMode){
@@ -1209,26 +1156,20 @@
     if (isLikelyDomain(q)){
       let url = q;
       if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-      window.open(url, '_blank');
+      window.location.href = url;
       return;
     }
     const encoded = encodeURIComponent(q);
     const engine = engines.find(e => e.id === selected);
     if (!engine) return;
-    window.open(engine.url(encoded), '_blank');
-    searchWikipedia(q);
-    showWikiModal();
+    window.location.href = engine.url(encoded);
   }
 
   const wikiResults = document.getElementById('wikiResults');
   const wikiModalOverlay = document.getElementById('wikiModalOverlay');
 
-  function showWikiModal(){
-    wikiModalOverlay.classList.add('show');
-  }
-  function hideWikiModal(){
-    wikiModalOverlay.classList.remove('show');
-  }
+  function showWikiModal(){ wikiModalOverlay.classList.add('show'); }
+  function hideWikiModal(){ wikiModalOverlay.classList.remove('show'); }
   document.getElementById('wikiModalClose').addEventListener('click', hideWikiModal);
   wikiModalOverlay.addEventListener('click', e => {
     if (e.target === wikiModalOverlay) hideWikiModal();
@@ -1261,7 +1202,6 @@
         const link = document.createElement('a');
         link.className = 'wiki-item';
         link.href = `https://ru.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`;
-        link.target = '_blank';
         link.rel = 'noopener';
         const cleanSnippet = item.snippet
           .replace(/<span class="searchmatch">/g, '<mark>')
@@ -1277,9 +1217,6 @@
     }
   }
 
-  /* ---------------------------------------------------------------
-     Custom hero background + adaptive title color
-  --------------------------------------------------------------- */
   const heroEl = document.querySelector('.hero');
   const brandTextEl = document.getElementById('brandText');
   const heroTitleEl = document.getElementById('heroTitle');
@@ -1289,8 +1226,6 @@
   const bgConfirmOverlay = document.getElementById('bgConfirmOverlay');
   const bgConfirmCancel = document.getElementById('bgConfirmCancel');
   const bgConfirmOk = document.getElementById('bgConfirmOk');
-
-  const DEFAULT_TITLE_COLOR = '#FF7A29';
 
   const colorTable = [
     { name:'red',    rgb:[214, 40, 40],  title:'#FFFFFF' },
@@ -1307,15 +1242,9 @@
   ];
 
   function colorDistance(a, b){
-    return Math.sqrt(
-      Math.pow(a[0]-b[0],2) + Math.pow(a[1]-b[1],2) + Math.pow(a[2]-b[2],2)
-    );
+    return Math.sqrt(Math.pow(a[0]-b[0],2) + Math.pow(a[1]-b[1],2) + Math.pow(a[2]-b[2],2));
   }
-
-  function opposite(rgb){
-    return `rgb(${255-rgb[0]}, ${255-rgb[1]}, ${255-rgb[2]})`;
-  }
-
+  function opposite(rgb){ return `rgb(${255-rgb[0]}, ${255-rgb[1]}, ${255-rgb[2]})`; }
   function pickTitleColor(rgb){
     let best = null, bestDist = Infinity;
     colorTable.forEach(entry => {
@@ -1325,42 +1254,33 @@
     if (bestDist > 140) return opposite(rgb);
     return best.title;
   }
-
   function getDominantColor(img){
     const canvas = document.createElement('canvas');
     const size = 40;
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = size; canvas.height = size;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, size, size);
     let r=0, g=0, b=0, count=0;
     try{
       const data = ctx.getImageData(0, 0, size, size).data;
       for (let i=0; i<data.length; i+=4){
-        r += data[i]; g += data[i+1]; b += data[i+2];
-        count++;
+        r += data[i]; g += data[i+1]; b += data[i+2]; count++;
       }
-    }catch(e){
-      return null;
-    }
+    }catch(e){ return null; }
     if (!count) return null;
     return [Math.round(r/count), Math.round(g/count), Math.round(b/count)];
   }
-
   function applyTitleColor(color){
     brandTextEl.style.color = color;
     heroTitleEl.style.color = color;
   }
-
   function resetTitleColor(){
     brandTextEl.style.color = '';
     heroTitleEl.style.color = '';
   }
-
   function applyHeroBackground(dataUrl){
     if (dataUrl){
-      heroEl.style.backgroundImage =
-        `linear-gradient(180deg, rgba(11,37,69,.45), rgba(11,37,69,.45)), url("${dataUrl}")`;
+      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(11,37,69,.45), rgba(11,37,69,.45)), url("${dataUrl}")`;
       heroEl.style.backgroundSize = 'cover';
       heroEl.style.backgroundPosition = 'center';
       heroEl.style.backgroundRepeat = 'no-repeat';
@@ -1373,7 +1293,6 @@
       bgResetBtn.classList.remove('show');
     }
   }
-
   function applyBackgroundAndColor(dataUrl){
     applyHeroBackground(dataUrl);
     const img = new Image();
@@ -1412,7 +1331,6 @@
     const toHex = x => Math.round(255*x).toString(16).padStart(2,'0');
     return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`.toUpperCase();
   }
-
   function hexToHsl(hex){
     const m = hex.replace('#','');
     const r = parseInt(m.substr(0,2),16)/255;
@@ -1433,16 +1351,10 @@
     }
     return [h, s*100, l*100];
   }
-
   function hslToRgbArr(h, s, l){
     const hex = hslToHex(h, s, l);
-    return [
-      parseInt(hex.substr(1,2),16),
-      parseInt(hex.substr(3,2),16),
-      parseInt(hex.substr(5,2),16)
-    ];
+    return [parseInt(hex.substr(1,2),16), parseInt(hex.substr(3,2),16), parseInt(hex.substr(5,2),16)];
   }
-
   function drawWheel(){
     const img = wheelCtx.createImageData(wheelSize, wheelSize);
     for (let y=0; y<wheelSize; y++){
@@ -1455,16 +1367,12 @@
           if (angle < 0) angle += 360;
           const sat = Math.min(100, (dist/wheelRadius)*100);
           const [r,g,b] = hslToRgbArr(angle, sat, 50);
-          img.data[idx] = r; img.data[idx+1] = g; img.data[idx+2] = b;
-          img.data[idx+3] = 255;
-        } else {
-          img.data[idx+3] = 0;
-        }
+          img.data[idx] = r; img.data[idx+1] = g; img.data[idx+2] = b; img.data[idx+3] = 255;
+        } else { img.data[idx+3] = 0; }
       }
     }
     wheelCtx.putImageData(img, 0, 0);
   }
-
   function setCursorFromHueSat(h, s){
     const angle = h * Math.PI/180;
     const r = (s/100) * wheelRadius;
@@ -1473,14 +1381,12 @@
     paletteWheelCursor.style.left = x + 'px';
     paletteWheelCursor.style.top = y + 'px';
   }
-
   function updatePreviewAndHex(){
     const l = Number(paletteLightness.value);
     const hex = hslToHex(pickerHue, pickerSat, l);
     palettePreview.style.background = hex;
     paletteHexInput.value = hex;
   }
-
   function pickFromEvent(e){
     const rect = paletteWheel.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -1495,7 +1401,6 @@
     setCursorFromHueSat(pickerHue, pickerSat);
     updatePreviewAndHex();
   }
-
   let wheelDragging = false;
   paletteWheel.addEventListener('mousedown', e => { wheelDragging = true; pickFromEvent(e); });
   window.addEventListener('mousemove', e => { if (wheelDragging) pickFromEvent(e); });
@@ -1503,9 +1408,7 @@
   paletteWheel.addEventListener('touchstart', e => { wheelDragging = true; pickFromEvent(e); });
   window.addEventListener('touchmove', e => { if (wheelDragging) pickFromEvent(e); });
   window.addEventListener('touchend', () => { wheelDragging = false; });
-
   paletteLightness.addEventListener('input', updatePreviewAndHex);
-
   paletteHexInput.addEventListener('change', () => {
     let hex = paletteHexInput.value.trim();
     if (!/^#?[0-9a-fA-F]{6}$/.test(hex)) { updatePreviewAndHex(); return; }
@@ -1518,14 +1421,12 @@
     palettePreview.style.background = hex;
     paletteHexInput.value = hex;
   });
-
   paletteApplyBtn.addEventListener('click', () => {
     const hex = paletteHexInput.value;
     applyTitleColor(hex);
     try{ localStorage.setItem('ors_title_color', hex); }catch(e){}
     palettePop.classList.remove('show');
   });
-
   drawWheel();
   setCursorFromHueSat(pickerHue, pickerSat);
   updatePreviewAndHex();
@@ -1552,12 +1453,8 @@
     reader.readAsDataURL(file);
   });
 
-  bgResetBtn.addEventListener('click', () => {
-    bgConfirmOverlay.classList.add('show');
-  });
-  bgConfirmCancel.addEventListener('click', () => {
-    bgConfirmOverlay.classList.remove('show');
-  });
+  bgResetBtn.addEventListener('click', () => { bgConfirmOverlay.classList.add('show'); });
+  bgConfirmCancel.addEventListener('click', () => { bgConfirmOverlay.classList.remove('show'); });
   bgConfirmOverlay.addEventListener('click', (e) => {
     if (e.target === bgConfirmOverlay) bgConfirmOverlay.classList.remove('show');
   });
@@ -1580,9 +1477,6 @@
     }
   }catch(e){}
 
-  /* ---------------------------------------------------------------
-     Dark theme toggle (iOS-style switch)
-  --------------------------------------------------------------- */
   const themeToggle = document.getElementById('themeToggle');
   const themeToggleIcon = document.getElementById('themeToggleIcon');
   const htmlEl = document.documentElement;
@@ -1596,13 +1490,11 @@
     themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
     themeToggleIcon.innerHTML = isDark ? moonIcon : sunIcon;
   }
-
   themeToggle.addEventListener('click', () => {
     const isDark = !themeToggle.classList.contains('on');
     applyTheme(isDark);
     try{ localStorage.setItem('ors_theme', isDark ? 'dark' : 'light'); }catch(e){}
   });
-
   try{
     const savedTheme = localStorage.getItem('ors_theme');
     if (savedTheme){
@@ -1611,9 +1503,7 @@
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       applyTheme(prefersDark);
     }
-  }catch(e){
-    applyTheme(false);
-  }
+  }catch(e){ applyTheme(false); }
 
   document.getElementById('mainSearchBtn').addEventListener('click', openSearch);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') openSearch(); });
@@ -1644,7 +1534,9 @@
         });
       }
       el.innerHTML = `
-        <div class="misc-dot"><img src="https://www.google.com/s2/favicons?sz=64&domain=${item.domain}" alt=""></div>
+        <div class="misc-dot" data-misc-name="${item.name}">
+          <span class="pin-letter-icon" style="width:22px;height:22px;border-radius:5px;font-size:14px;">${item.name[0]}</span>
+        </div>
         <div>
           <div class="misc-name">${item.name}</div>
           <div class="misc-sub">${item.sub}</div>
@@ -1652,6 +1544,26 @@
       `;
       miscGrid.appendChild(el);
     });
+
+    setTimeout(() => {
+      if (input.value.trim()) return;
+      miscItems.forEach(item => {
+        const dot = miscGrid.querySelector(`.misc-dot[data-misc-name="${item.name}"]`);
+        if (!dot) return;
+        const img = new Image();
+        img.src = `https://www.google.com/s2/favicons?sz=64&domain=${item.domain}`;
+        img.alt = '';
+        img.style.width = '22px';
+        img.style.height = '22px';
+        img.style.objectFit = 'contain';
+        img.onload = () => {
+          if (!input.value.trim()) {
+            dot.innerHTML = '';
+            dot.appendChild(img);
+          }
+        };
+      });
+    }, 3000);
   }
 
   renderMisc();
@@ -1663,14 +1575,11 @@
     setMode(mode === 'wiki' ? 'normal' : 'wiki');
     input.focus();
   });
-
   document.getElementById('tabNormal').addEventListener('click', () => {
-    setMode('normal');
-    input.focus();
+    setMode('normal'); input.focus();
   });
   document.getElementById('tabWiki').addEventListener('click', () => {
-    setMode('wiki');
-    input.focus();
+    setMode('wiki'); input.focus();
   });
 
   try{
@@ -1689,8 +1598,9 @@
 
   const urlParams = new URLSearchParams(window.location.search);
   const qParam = urlParams.get('q');
-  if (qParam){
+  if (qParam && qParam.trim()){
     input.value = qParam;
+    openSearch();
   }
 </script>
 
