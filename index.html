@@ -3,20 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 <title>Open Ru Search</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
+    color-scheme:light;
     --blue-900:#0B2545;
     --blue-700:#134E9B;
     --blue-500:#1C6FD6;
     --blue-100:#EAF2FC;
     --paper:#FBFCFE;
+    --surface:#FFFFFF;
     --ink:#16233A;
     --ink-soft:#5C6B85;
     --line:#DCE7F7;
     --radius:16px;
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --blue-900:#050F1D;
+    --blue-700:#123A6E;
+    --blue-500:#1C5CA8;
+    --blue-100:#16223B;
+    --paper:#0B1220;
+    --surface:#141E32;
+    --ink:#E7ECF6;
+    --ink-soft:#93A2C2;
+    --line:#233152;
+  }
+  body, .panel, .engine-card, .misc-card, .wiki-item, .search-box, .wiki-modal,
+  .bg-confirm-box, .palette-pop{
+    transition:background-color .25s ease, color .25s ease, border-color .25s ease;
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
   body{
@@ -41,6 +60,8 @@
     font-family:'Manrope', sans-serif;
     font-weight:800;
     letter-spacing:.2px;
+    color:#FF7A29;
+    transition:color .3s;
   }
   .topbar .brandmark b{ color:#FF7A29; }
   .topbar nav a{
@@ -50,6 +71,231 @@
     font-weight:500;
   }
   .topbar nav a:hover{ color:#fff; }
+  .topbar nav{ display:flex; align-items:center; gap:14px; }
+
+  .theme-toggle{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    width:46px;
+    height:26px;
+    border-radius:999px;
+    background:rgba(255,255,255,.22);
+    border:1px solid rgba(255,255,255,.3);
+    cursor:pointer;
+    padding:0;
+    flex-shrink:0;
+    transition:background .25s ease;
+  }
+  .theme-toggle.on{
+    background:#34C759;
+    border-color:#34C759;
+  }
+  .theme-toggle .theme-toggle-knob{
+    position:absolute;
+    top:2px;
+    left:2px;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 2px 5px rgba(0,0,0,.3);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+  }
+  .theme-toggle.on .theme-toggle-knob{
+    transform:translateX(20px);
+  }
+  .theme-toggle .theme-toggle-knob svg{
+    width:12px; height:12px;
+  }
+  .bg-switch-btn{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.25);
+    color:#B9D3F5;
+    width:28px; height:28px;
+    border-radius:8px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+    transition:background .15s, color .15s;
+  }
+  .bg-switch-btn:hover{ background:rgba(255,255,255,.24); color:#fff; }
+  .bg-switch-btn svg{ display:block; }
+  .bg-reset-btn{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.25);
+    color:#B9D3F5;
+    width:28px; height:28px;
+    border-radius:8px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+    transition:background .15s, color .15s;
+  }
+  .bg-reset-btn.show{ display:inline-flex; }
+  .bg-reset-btn:hover{ background:rgba(255,90,60,.35); color:#fff; }
+  .bg-reset-btn svg{ display:block; }
+
+  .palette-wrap{ position:relative; display:inline-flex; }
+  .palette-btn{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.25);
+    color:#B9D3F5;
+    width:28px; height:28px;
+    border-radius:8px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+    transition:background .15s, color .15s;
+  }
+  .palette-btn:hover{ background:rgba(255,255,255,.24); color:#fff; }
+  .palette-btn svg{ display:block; }
+  .palette-pop{
+    display:none;
+    position:absolute;
+    top:36px;
+    right:0;
+    background:var(--surface);
+    border-radius:14px;
+    box-shadow:0 18px 40px rgba(11,37,69,.35);
+    padding:16px;
+    z-index:150;
+    width:220px;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+  }
+  .palette-pop.show{ display:flex; }
+  .palette-wheel-wrap{
+    position:relative;
+    width:170px;
+    height:170px;
+  }
+  .palette-wheel{
+    width:170px;
+    height:170px;
+    border-radius:50%;
+    cursor:crosshair;
+    display:block;
+  }
+  .palette-wheel-cursor{
+    position:absolute;
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    border:2px solid #fff;
+    box-shadow:0 0 0 1px rgba(0,0,0,.4), 0 1px 4px rgba(0,0,0,.35);
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    top:0; left:0;
+  }
+  .palette-lightness-row{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .palette-lightness-row input[type="range"]{
+    flex:1;
+    height:14px;
+    cursor:pointer;
+  }
+  .palette-preview{
+    width:22px; height:22px;
+    border-radius:50%;
+    border:2px solid #fff;
+    box-shadow:0 0 0 1px var(--line);
+    flex-shrink:0;
+  }
+  .palette-hex-row{
+    width:100%;
+    display:flex;
+    gap:8px;
+  }
+  .palette-hex-row input[type="text"]{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:6px 8px;
+    font-size:12.5px;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    outline:none;
+    min-width:0;
+  }
+  .palette-hex-row input[type="text"]:focus{ border-color:var(--blue-500); }
+  .palette-apply-btn{
+    background:var(--blue-700);
+    color:#fff;
+    border:none;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    padding:7px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .palette-apply-btn:hover{ background:var(--blue-900); }
+
+  .bg-confirm-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(11,37,69,.55);
+    z-index:200;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .bg-confirm-overlay.show{ display:flex; }
+  .bg-confirm-box{
+    background:var(--surface);
+    border-radius:var(--radius);
+    max-width:360px;
+    width:100%;
+    padding:22px 22px 18px;
+    box-shadow:0 30px 60px rgba(11,37,69,.4);
+  }
+  .bg-confirm-box h3{
+    font-family:'Manrope', sans-serif;
+    font-size:16px;
+    margin-bottom:8px;
+    color:var(--ink);
+  }
+  .bg-confirm-box p{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    margin-bottom:18px;
+  }
+  .bg-confirm-actions{
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+  }
+  .bg-confirm-actions button{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:9px;
+    cursor:pointer;
+    border:none;
+  }
+  .bg-confirm-cancel{ background:var(--blue-100); color:var(--blue-700); }
+  .bg-confirm-cancel:hover{ background:#dfeafc; }
+  .bg-confirm-ok{ background:#E24C3A; color:#fff; }
+  .bg-confirm-ok:hover{ background:#c93d2c; }
 
   .hero{
     background:linear-gradient(180deg, var(--blue-700) 0%, var(--blue-500) 100%);
@@ -63,6 +309,8 @@
     font-size:44px;
     font-weight:800;
     letter-spacing:-.5px;
+    color:#FF7A29;
+    transition:color .3s;
   }
   .hero h1 .tag{
     display:inline-block;
@@ -83,18 +331,62 @@
     font-size:15px;
   }
 
+  .mode-switch{
+    max-width:680px;
+    margin:26px auto 0;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+  }
+  .mode-tab{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--surface);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding:9px 20px 9px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    border:2px solid transparent;
+    transition:border-color .15s, background .15s, transform .12s;
+  }
+  .mode-tab:hover{ transform:translateY(-1px); }
+  .mode-tab.active{
+    border-color:var(--blue-900);
+    background:var(--surface);
+  }
+  .mode-tab svg{ flex-shrink:0; }
+  .mode-tab .dot{
+    width:22px; height:22px;
+    border-radius:50%;
+    background:var(--blue-500);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+
   .search-wrap{
     max-width:680px;
-    margin:34px auto 0;
+    margin:22px auto 0;
     position:relative;
   }
   .search-box{
-    background:#fff;
+    background:var(--surface);
     border-radius:999px;
     display:flex;
     align-items:center;
-    padding:6px 6px 6px 22px;
+    padding:6px 6px 6px 20px;
     box-shadow:0 18px 40px rgba(11,37,69,.35);
+  }
+  .search-box .search-icon{
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    margin-right:4px;
   }
   .search-box input{
     flex:1;
@@ -127,6 +419,7 @@
     justify-content:center;
     gap:10px;
     flex-wrap:wrap;
+    align-items:center;
   }
   .quick-row span{
     background:rgba(255,255,255,.14);
@@ -142,13 +435,15 @@
   .content{
     max-width:920px;
     width:100%;
-    margin:-46px auto 0;
-    padding:0 20px 60px;
+    margin:0 auto 0;
+    padding:24px 20px 60px;
     flex:1;
+    position:relative;
+    z-index:1;
   }
 
   .panel{
-    background:#fff;
+    background:var(--surface);
     border-radius:var(--radius);
     border:1px solid var(--line);
     box-shadow:0 4px 24px rgba(11,37,69,.06);
@@ -165,6 +460,7 @@
     font-family:'Manrope', sans-serif;
     font-size:18px;
     font-weight:700;
+    color:var(--ink);
   }
   .panel-head span{
     font-size:12.5px;
@@ -177,20 +473,74 @@
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    width:30px;
-    padding:6px;
+    min-width:34px;
+    padding:6px 10px;
+    font-weight:700;
+    font-size:14px;
   }
   .quick-row span.pin-btn:hover{ background:rgba(255,255,255,.24); }
+  .quick-row span.pin-btn.editing{
+    background:#FF7A29;
+    border-color:#FF7A29;
+    border-style:solid;
+    color:#fff;
+  }
   .quick-row span.pinned-item{
     display:inline-flex;
     align-items:center;
     gap:6px;
+    padding-right:8px;
   }
+  .quick-row span.pinned-item .pin-label{ cursor:pointer; }
   .quick-row span.pinned-item .unpin-x{
-    opacity:.7;
+    opacity:.85;
     font-weight:700;
+    cursor:pointer;
+    padding:0 4px;
+    line-height:1;
+    font-size:12px;
+    color:#FF7A29;
   }
-  .quick-row span.pinned-item .unpin-x:hover{ opacity:1; }
+  .quick-row span.pinned-item .unpin-x:hover{ opacity:1; color:#fff; }
+  .quick-row .pin-add-input{
+    background:rgba(255,255,255,.95);
+    border:1px solid rgba(255,255,255,.4);
+    border-radius:999px;
+    padding:6px 12px;
+    font-size:12.5px;
+    font-family:'Inter', sans-serif;
+    color:#16233A;
+    outline:none;
+    width:170px;
+  }
+  .quick-row .pin-add-input::placeholder{ color:#8FA3BF; }
+  .quick-row .pin-save-btn{
+    background:#FF7A29;
+    color:#fff;
+    border:1px solid #FF7A29;
+    border-radius:999px;
+    padding:6px 14px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Inter', sans-serif;
+  }
+  .quick-row .pin-save-btn:hover{ background:#e56a1d; }
+  .pin-letter-icon{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:16px;
+    height:16px;
+    border-radius:4px;
+    background:#008373;
+    color:#fff;
+    font-weight:800;
+    font-size:11px;
+    font-family:'Manrope', sans-serif;
+    flex-shrink:0;
+    line-height:1;
+  }
 
   .region-filter{
     display:flex;
@@ -208,7 +558,7 @@
     cursor:pointer;
     border:1px solid var(--line);
   }
-  .region-chip:hover{ background:#fff; border-color:var(--blue-500); }
+  .region-chip:hover{ background:var(--surface); border-color:var(--blue-500); }
   .region-chip.active{
     background:var(--blue-700);
     color:#fff;
@@ -234,12 +584,12 @@
   }
   .engine-card:hover{
     border-color:var(--blue-500);
-    background:#fff;
+    background:var(--surface);
     transform:translateY(-2px);
   }
   .engine-card.active{
     border-color:var(--blue-500);
-    background:#fff;
+    background:var(--surface);
     box-shadow:0 0 0 2px var(--blue-500) inset;
   }
   .engine-dot{
@@ -247,7 +597,7 @@
     border-radius:9px;
     display:flex; align-items:center; justify-content:center;
     flex-shrink:0;
-    background:#fff;
+    background:var(--surface);
     border:1px solid var(--line);
     overflow:hidden;
   }
@@ -314,7 +664,7 @@
     display:block;
     transition:border-color .15s, background .15s;
   }
-  .wiki-item:hover{ border-color:var(--blue-500); background:#fff; }
+  .wiki-item:hover{ border-color:var(--blue-500); background:var(--surface); }
   .wiki-item .wiki-title{
     font-size:14.5px;
     font-weight:700;
@@ -358,7 +708,7 @@
   }
   .misc-card:hover{
     border-color:var(--blue-500);
-    background:#fff;
+    background:var(--surface);
     transform:translateY(-2px);
   }
   .misc-dot{
@@ -366,7 +716,7 @@
     border-radius:9px;
     display:flex; align-items:center; justify-content:center;
     flex-shrink:0;
-    background:#fff;
+    background:var(--surface);
     border:1px solid var(--line);
     overflow:hidden;
   }
@@ -394,7 +744,7 @@
   }
   .wiki-modal-overlay.show{ display:flex; }
   .wiki-modal{
-    background:#fff;
+    background:var(--surface);
     border-radius:var(--radius);
     max-width:640px;
     width:100%;
@@ -445,6 +795,7 @@
     .search-box input{ font-size:14px; }
     .search-box button{ padding:11px 16px; font-size:13px; }
     .engine-grid{ grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); }
+    .mode-switch{ flex-wrap:wrap; }
   }
 </style>
 </head>
@@ -454,26 +805,94 @@
   <div class="brandmark" id="brandText" style="cursor:pointer;" title="Вернуться к обычному поиску">Open <b>Ru</b> Search</div>
   <nav>
     <a href="https://github.com/ARTEMPRO01MINETEXNICK" target="_blank" rel="noopener">Разработчик</a>
+    <button class="bg-switch-btn" id="bgSwitchBtn" type="button" title="Сменить фон">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="8.5" cy="9.5" r="1.5" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M21 15l-5.5-5.5a1.5 1.5 0 0 0-2.12 0L4 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="bg-reset-btn" id="bgResetBtn" type="button" title="Сбросить фон">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 12a9 9 0 1 1 3 6.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M3 19v-5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <input type="file" id="bgFileInput" accept="image/*" style="display:none;">
+    <div class="palette-wrap">
+      <button class="palette-btn" id="paletteBtn" type="button" title="Цвет надписи">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.7 1.8-1.6 0-.4-.16-.77-.42-1.07-.27-.3-.43-.65-.43-1.03 0-.9.72-1.6 1.6-1.6H16.5A4.5 4.5 0 0 0 21 11.25C21 6.7 16.97 3 12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <circle cx="7.5" cy="10.5" r="1.1" fill="currentColor"/>
+          <circle cx="11" cy="7.2" r="1.1" fill="currentColor"/>
+          <circle cx="15.2" cy="7.6" r="1.1" fill="currentColor"/>
+          <circle cx="17.3" cy="11.5" r="1.1" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="palette-pop" id="palettePop">
+        <div class="palette-wheel-wrap">
+          <canvas class="palette-wheel" id="paletteWheel" width="170" height="170"></canvas>
+          <div class="palette-wheel-cursor" id="paletteWheelCursor"></div>
+        </div>
+        <div class="palette-lightness-row">
+          <input type="range" id="paletteLightness" min="0" max="100" value="50">
+          <div class="palette-preview" id="palettePreview"></div>
+        </div>
+        <div class="palette-hex-row">
+          <input type="text" id="paletteHexInput" value="#FF4F00" maxlength="7">
+          <button class="palette-apply-btn" id="paletteApplyBtn" type="button">ОК</button>
+        </div>
+      </div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button" title="Тёмная тема" aria-pressed="false">
+      <span class="theme-toggle-knob">
+        <svg id="themeToggleIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="5" stroke="#F0A400" stroke-width="2"/>
+          <path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="#F0A400" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </button>
   </nav>
 </div>
 
+<div class="bg-confirm-overlay" id="bgConfirmOverlay">
+  <div class="bg-confirm-box">
+    <h3>Сбросить фон?</h3>
+    <p>Загруженная картинка будет удалена, и фон вернётся к стандартному синему градиенту. Это действие нельзя отменить.</p>
+    <div class="bg-confirm-actions">
+      <button class="bg-confirm-cancel" id="bgConfirmCancel">Отмена</button>
+      <button class="bg-confirm-ok" id="bgConfirmOk">Сбросить</button>
+    </div>
+  </div>
+</div>
+
 <div class="hero">
-  <h1 id="heroTitle">Open Ru Search<span class="tag">launcher</span></h1>
+  <h1 id="heroTitle">Open Ru Search</h1>
   <p id="heroSub">Один запрос — в выбранный вами поисковик</p>
+
+  <div class="mode-switch" id="modeSwitch">
+    <div class="mode-tab active" id="tabNormal" data-mode="normal">
+      <span>Поиск</span>
+    </div>
+    <div class="mode-tab" id="tabWiki" data-mode="wiki">
+      <span>Википоиск</span>
+    </div>
+  </div>
 
   <div class="search-wrap">
     <div class="search-box">
+      <span class="search-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="7" stroke="#1C6FD6" stroke-width="2.4"/>
+          <path d="M20 20L16.65 16.65" stroke="#1C6FD6" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </span>
       <input type="text" id="queryInput" placeholder="Что будем искать?" autofocus>
       <button id="mainSearchBtn">Искать</button>
     </div>
   </div>
 
-  <div class="quick-row" id="pinnedRow">
-    <span onclick="window.open('https://www.youtube.com','_blank')">youtube.com</span>
-  </div>
-  <div class="quick-row" id="backRow" style="display:none; margin-top:10px;">
-    <span id="backToBrowserBtn" style="background:#FF7A29; border-color:#FF7A29;">← Вернуться к обычному поиску</span>
-  </div>
+  <div class="quick-row" id="pinnedRow"></div>
 </div>
 
 <div class="content">
@@ -523,29 +942,34 @@
 
 <script>
   const engines = [
+    // Мировые
     { id:'google',      name:'Google',       region:'Мир',    domain:'google.com',        url:q => `https://www.google.com/search?q=${q}` },
-    { id:'yandex',      name:'Яндекс',       region:'РФ',     domain:'yandex.ru',          url:q => `https://yandex.ru/search/?text=${q}` },
     { id:'bing',        name:'Bing',         region:'Мир',    domain:'bing.com',           url:q => `https://www.bing.com/search?q=${q}` },
     { id:'ddg',         name:'DuckDuckGo',   region:'Мир',    domain:'duckduckgo.com',     url:q => `https://duckduckgo.com/?q=${q}` },
+    { id:'brave',       name:'Brave Search', region:'Мир',    domain:'search.brave.com',   url:q => `https://search.brave.com/search?q=${q}` },
+    { id:'startpage',   name:'Startpage',    region:'Мир',    domain:'startpage.com',      url:q => `https://www.startpage.com/sp/search?query=${q}` },
+    { id:'mojeek',      name:'Mojeek',       region:'Мир',    domain:'mojeek.com',         url:q => `https://www.mojeek.com/search?q=${q}` },
+    { id:'kagi',        name:'Kagi',         region:'Мир',    domain:'kagi.com',           url:q => `https://kagi.com/search?q=${q}` },
+    { id:'yahoo',       name:'Yahoo',        region:'Мир',    domain:'search.yahoo.com',   url:q => `https://search.yahoo.com/search?p=${q}` },
+    { id:'perplexity',  name:'Perplexity',   region:'Мир',    domain:'perplexity.ai',      url:q => `https://www.perplexity.ai/search?q=${q}` },
+
+    // Россия / СНГ
+    { id:'yandex',      name:'Яндекс',       region:'РФ',     domain:'yandex.ru',          url:q => `https://yandex.ru/search/?text=${q}` },
     { id:'mailru',      name:'Mail.ru',      region:'РФ',     domain:'mail.ru',            url:q => `https://go.mail.ru/search?q=${q}` },
     { id:'rambler',     name:'Rambler',      region:'РФ',     domain:'rambler.ru',         url:q => `https://nova.rambler.ru/search?query=${q}` },
-    { id:'nigma',       name:'Нигма',        region:'РФ',     domain:'nigma.ru',           url:q => `https://www.nigma.ru/index.php?s=${q}` },
     { id:'gogo',        name:'Gogo.ru',      region:'РФ',     domain:'gogo.ru',            url:q => `https://gogo.ru/search?q=${q}` },
-    { id:'startpage',   name:'Startpage',    region:'Мир',    domain:'startpage.com',      url:q => `https://www.startpage.com/sp/search?query=${q}` },
-    { id:'ecosia',      name:'Ecosia',       region:'Мир',    domain:'ecosia.org',         url:q => `https://www.ecosia.org/search?q=${q}` },
-    { id:'brave',       name:'Brave Search', region:'Мир',    domain:'search.brave.com',   url:q => `https://search.brave.com/search?q=${q}` },
+
+    // Европа
     { id:'qwant',       name:'Qwant',        region:'Европа', domain:'qwant.com',          url:q => `https://www.qwant.com/?q=${q}` },
-    { id:'baidu',       name:'Baidu',        region:'Китай',  domain:'baidu.com',          url:q => `https://www.baidu.com/s?wd=${q}` },
-    { id:'yahoo',       name:'Yahoo',        region:'Мир',    domain:'search.yahoo.com',   url:q => `https://search.yahoo.com/search?p=${q}` },
-    { id:'naver',       name:'Naver',        region:'Корея',  domain:'naver.com',          url:q => `https://search.naver.com/search.naver?query=${q}` },
-    { id:'seznam',      name:'Seznam',       region:'Чехия',  domain:'seznam.cz',          url:q => `https://search.seznam.cz/?q=${q}` },
-    { id:'sogou',       name:'Sogou',        region:'Китай',  domain:'sogou.com',          url:q => `https://www.sogou.com/web?query=${q}` },
-    { id:'ask',         name:'Ask.com',      region:'Мир',    domain:'ask.com',            url:q => `https://www.ask.com/web?q=${q}` },
-    { id:'aol',         name:'AOL',          region:'Мир',    domain:'search.aol.com',     url:q => `https://search.aol.com/aol/search?q=${q}` },
-    { id:'coccoc',      name:'Coc Coc',      region:'Вьетнам',domain:'coccoc.com',         url:q => `https://coccoc.com/search?query=${q}` },
-    { id:'presearch',   name:'Presearch',    region:'Мир',    domain:'presearch.com',      url:q => `https://presearch.com/search?q=${q}` },
+    { id:'ecosia',      name:'Ecosia',       region:'Европа', domain:'ecosia.org',         url:q => `https://www.ecosia.org/search?q=${q}` },
+    { id:'seznam',      name:'Seznam',       region:'Европа', domain:'seznam.cz',          url:q => `https://search.seznam.cz/?q=${q}` },
     { id:'swisscows',   name:'Swisscows',    region:'Европа', domain:'swisscows.com',      url:q => `https://swisscows.com/en/web?query=${q}` },
-    { id:'mojeek',      name:'Mojeek',       region:'Мир',    domain:'mojeek.com',         url:q => `https://www.mojeek.com/search?q=${q}` },
+
+    // Азия
+    { id:'baidu',       name:'Baidu',        region:'Азия',   domain:'baidu.com',          url:q => `https://www.baidu.com/s?wd=${q}` },
+    { id:'naver',       name:'Naver',        region:'Азия',   domain:'naver.com',          url:q => `https://search.naver.com/search.naver?query=${q}` },
+    { id:'sogou',       name:'Sogou',        region:'Азия',   domain:'sogou.com',          url:q => `https://www.sogou.com/web?query=${q}` },
+    { id:'coccoc',      name:'Coc Coc',      region:'Азия',   domain:'coccoc.com',         url:q => `https://coccoc.com/search?query=${q}` },
   ];
 
   let selected = 'google';
@@ -579,8 +1003,13 @@
     list.forEach(e => {
       const card = document.createElement('div');
       card.className = 'engine-card' + (selected === e.id ? ' active' : '');
+
+      const iconHtml = e.id === 'bing'
+        ? `<span class="pin-letter-icon" style="width:22px;height:22px;border-radius:5px;font-size:14px;">B</span>`
+        : `<img src="https://www.google.com/s2/favicons?sz=64&domain=${e.domain}" alt="">`;
+
       card.innerHTML = `
-        <div class="engine-dot"><img src="https://www.google.com/s2/favicons?sz=64&domain=${e.domain}" alt=""></div>
+        <div class="engine-dot">${iconHtml}</div>
         <div>
           <div class="engine-name">${e.name}</div>
           <div class="engine-region">${e.region}</div>
@@ -602,29 +1031,166 @@
     input.focus();
   }
 
-  let mode = 'normal'; // 'normal' | 'wiki'
+  /* ---------------------------------------------------------------
+     Pinned quick links (закреплённые быстрые ссылки)
+  --------------------------------------------------------------- */
+  const pinnedRow = document.getElementById('pinnedRow');
+  const DEFAULT_PINNED = [
+    { label:'youtube.com', url:'https://www.youtube.com' },
+    { label:'tiktok.com',  url:'https://www.tiktok.com' },
+    { label:'telegram',    url:'https://web.telegram.org' },
+    { label:'bing.com',    url:'https://www.bing.com' },
+  ];
 
-  function setMode(newMode){
+  let pinnedEditMode = false;
+
+  function getPinned(){
+    try{
+      const raw = localStorage.getItem('ors_pinned');
+      if (raw) return JSON.parse(raw);
+    }catch(e){}
+    return DEFAULT_PINNED.slice();
+  }
+  function savePinned(list){
+    try{ localStorage.setItem('ors_pinned', JSON.stringify(list)); }catch(e){}
+  }
+
+  function getPinnedIcon(item){
+    if (item.url && item.url.includes('bing.com')){
+      return `<span class="pin-letter-icon">B</span>`;
+    }
+    return '';
+  }
+
+  function renderPinned(){
+    const list = getPinned();
+    pinnedRow.innerHTML = '';
+
+    list.forEach((item, idx) => {
+      const span = document.createElement('span');
+      span.className = 'pinned-item';
+
+      if (pinnedEditMode){
+        span.innerHTML = `
+          ${getPinnedIcon(item)}
+          <span class="pin-label" style="cursor:default;">${item.label}</span>
+          <span class="unpin-x" title="Удалить">✕</span>
+        `;
+        span.querySelector('.unpin-x').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const newList = getPinned();
+          newList.splice(idx, 1);
+          savePinned(newList);
+          renderPinned();
+        });
+      } else {
+        span.innerHTML = `${getPinnedIcon(item)}<span class="pin-label">${item.label}</span>`;
+        span.querySelector('.pin-label').addEventListener('click', () => {
+          window.open(item.url, '_blank');
+        });
+      }
+      pinnedRow.appendChild(span);
+    });
+
+    if (pinnedEditMode){
+      const addInput = document.createElement('input');
+      addInput.type = 'text';
+      addInput.className = 'pin-add-input';
+      addInput.placeholder = 'сайт, напр. bing.com';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.type = 'button';
+      saveBtn.className = 'pin-save-btn';
+      saveBtn.textContent = 'Добавить';
+
+      function addNew(){
+        let url = addInput.value.trim();
+        if (!url) { addInput.focus(); return; }
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+        const label = url.replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+        const newList = getPinned();
+        newList.push({ label, url });
+        savePinned(newList);
+        addInput.value = '';
+        renderPinned();
+      }
+
+      saveBtn.addEventListener('click', addNew);
+      addInput.addEventListener('keydown', e => { if (e.key === 'Enter') addNew(); });
+
+      pinnedRow.appendChild(addInput);
+      pinnedRow.appendChild(saveBtn);
+      setTimeout(() => addInput.focus(), 0);
+    }
+
+    const pencilBtn = document.createElement('span');
+    pencilBtn.className = 'pin-btn' + (pinnedEditMode ? ' editing' : '');
+    pencilBtn.title = pinnedEditMode ? 'Готово' : 'Редактировать закреплённые';
+    pencilBtn.innerHTML = pinnedEditMode
+      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+           <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+         </svg>`
+      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+           <path d="M4 20h4l10.5-10.5a2.83 2.83 0 0 0-4-4L4 16v4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+           <path d="M13.5 6.5l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+         </svg>`;
+
+    pencilBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      pinnedEditMode = !pinnedEditMode;
+      renderPinned();
+    });
+    pinnedRow.appendChild(pencilBtn);
+  }
+
+  /* ---------------------------------------------------------------
+     Mode handling
+  --------------------------------------------------------------- */
+  let mode = 'normal';
+
+  function applyModeUI(newMode){
     mode = newMode;
     const brandText = document.getElementById('brandText');
     const heroTitle = document.getElementById('heroTitle');
     const heroSub = document.getElementById('heroSub');
-    const backRow = document.getElementById('backRow');
+    const tabNormal = document.getElementById('tabNormal');
+    const tabWiki = document.getElementById('tabWiki');
+
     if (mode === 'wiki'){
       brandText.innerHTML = 'Вики <b>Поиск</b>';
-      heroTitle.innerHTML = 'Вики Поиск<span class="tag">launcher</span>';
+      heroTitle.innerHTML = 'Вики Поиск';
       heroSub.textContent = 'Один запрос — сразу статьи из Википедии';
       input.placeholder = 'Что ищем в Википедии?';
-      backRow.style.display = 'flex';
+      tabWiki.classList.add('active');
+      tabNormal.classList.remove('active');
     } else {
       brandText.innerHTML = 'Open <b>Ru</b> Search';
-      heroTitle.innerHTML = 'Open Ru Search<span class="tag">launcher</span>';
+      heroTitle.innerHTML = 'Open Ru Search';
       heroSub.textContent = 'Один запрос — в выбранный вами поисковик';
       input.placeholder = 'Что будем искать?';
-      backRow.style.display = 'none';
+      tabNormal.classList.add('active');
+      tabWiki.classList.remove('active');
     }
     try{ localStorage.setItem('ors_mode', mode); }catch(e){}
   }
+
+  function setMode(newMode, opts){
+    opts = opts || {};
+    if (newMode === mode && !opts.force) return;
+    applyModeUI(newMode);
+    if (!opts.silent){
+      history.pushState({ orsMode: newMode }, '', location.pathname + location.search);
+    }
+  }
+
+  function applyModeSilently(newMode){
+    applyModeUI(newMode);
+  }
+
+  window.addEventListener('popstate', (e) => {
+    const targetMode = (e.state && e.state.orsMode) ? e.state.orsMode : 'normal';
+    applyModeSilently(targetMode);
+  });
 
   function isLikelyDomain(text){
     const t = text.trim();
@@ -711,6 +1277,344 @@
     }
   }
 
+  /* ---------------------------------------------------------------
+     Custom hero background + adaptive title color
+  --------------------------------------------------------------- */
+  const heroEl = document.querySelector('.hero');
+  const brandTextEl = document.getElementById('brandText');
+  const heroTitleEl = document.getElementById('heroTitle');
+  const bgSwitchBtn = document.getElementById('bgSwitchBtn');
+  const bgResetBtn = document.getElementById('bgResetBtn');
+  const bgFileInput = document.getElementById('bgFileInput');
+  const bgConfirmOverlay = document.getElementById('bgConfirmOverlay');
+  const bgConfirmCancel = document.getElementById('bgConfirmCancel');
+  const bgConfirmOk = document.getElementById('bgConfirmOk');
+
+  const DEFAULT_TITLE_COLOR = '#FF7A29';
+
+  const colorTable = [
+    { name:'red',    rgb:[214, 40, 40],  title:'#FFFFFF' },
+    { name:'orange', rgb:[255, 122, 41], title:'#FFFFFF' },
+    { name:'yellow', rgb:[240, 200, 40], title:'#0B2545' },
+    { name:'green',  rgb:[50, 160, 90],  title:'#FFFFFF' },
+    { name:'blue',   rgb:[28, 111, 214], title:'#FF7A29' },
+    { name:'cyan',   rgb:[40, 180, 210], title:'#0B2545' },
+    { name:'purple', rgb:[130, 70, 190], title:'#FFD24A' },
+    { name:'pink',   rgb:[230, 90, 160], title:'#FFFFFF' },
+    { name:'white',  rgb:[240, 240, 240],title:'#134E9B' },
+    { name:'black',  rgb:[20, 20, 20],   title:'#FF7A29' },
+    { name:'gray',   rgb:[130, 130, 130],title:'#FF7A29' },
+  ];
+
+  function colorDistance(a, b){
+    return Math.sqrt(
+      Math.pow(a[0]-b[0],2) + Math.pow(a[1]-b[1],2) + Math.pow(a[2]-b[2],2)
+    );
+  }
+
+  function opposite(rgb){
+    return `rgb(${255-rgb[0]}, ${255-rgb[1]}, ${255-rgb[2]})`;
+  }
+
+  function pickTitleColor(rgb){
+    let best = null, bestDist = Infinity;
+    colorTable.forEach(entry => {
+      const d = colorDistance(rgb, entry.rgb);
+      if (d < bestDist){ bestDist = d; best = entry; }
+    });
+    if (bestDist > 140) return opposite(rgb);
+    return best.title;
+  }
+
+  function getDominantColor(img){
+    const canvas = document.createElement('canvas');
+    const size = 40;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, size, size);
+    let r=0, g=0, b=0, count=0;
+    try{
+      const data = ctx.getImageData(0, 0, size, size).data;
+      for (let i=0; i<data.length; i+=4){
+        r += data[i]; g += data[i+1]; b += data[i+2];
+        count++;
+      }
+    }catch(e){
+      return null;
+    }
+    if (!count) return null;
+    return [Math.round(r/count), Math.round(g/count), Math.round(b/count)];
+  }
+
+  function applyTitleColor(color){
+    brandTextEl.style.color = color;
+    heroTitleEl.style.color = color;
+  }
+
+  function resetTitleColor(){
+    brandTextEl.style.color = '';
+    heroTitleEl.style.color = '';
+  }
+
+  function applyHeroBackground(dataUrl){
+    if (dataUrl){
+      heroEl.style.backgroundImage =
+        `linear-gradient(180deg, rgba(11,37,69,.45), rgba(11,37,69,.45)), url("${dataUrl}")`;
+      heroEl.style.backgroundSize = 'cover';
+      heroEl.style.backgroundPosition = 'center';
+      heroEl.style.backgroundRepeat = 'no-repeat';
+      bgResetBtn.classList.add('show');
+    } else {
+      heroEl.style.backgroundImage = '';
+      heroEl.style.backgroundSize = '';
+      heroEl.style.backgroundPosition = '';
+      heroEl.style.backgroundRepeat = '';
+      bgResetBtn.classList.remove('show');
+    }
+  }
+
+  function applyBackgroundAndColor(dataUrl){
+    applyHeroBackground(dataUrl);
+    const img = new Image();
+    img.onload = () => {
+      const rgb = getDominantColor(img);
+      if (rgb){
+        const titleColor = pickTitleColor(rgb);
+        applyTitleColor(titleColor);
+        try{ localStorage.setItem('ors_title_color', titleColor); }catch(e){}
+      }
+    };
+    img.src = dataUrl;
+  }
+
+  bgSwitchBtn.addEventListener('click', () => bgFileInput.click());
+
+  const paletteBtn = document.getElementById('paletteBtn');
+  const palettePop = document.getElementById('palettePop');
+  const paletteWheel = document.getElementById('paletteWheel');
+  const paletteWheelCursor = document.getElementById('paletteWheelCursor');
+  const paletteLightness = document.getElementById('paletteLightness');
+  const palettePreview = document.getElementById('palettePreview');
+  const paletteHexInput = document.getElementById('paletteHexInput');
+  const paletteApplyBtn = document.getElementById('paletteApplyBtn');
+  const wheelCtx = paletteWheel.getContext('2d');
+  const wheelSize = paletteWheel.width;
+  const wheelRadius = wheelSize / 2;
+
+  let pickerHue = 20, pickerSat = 100;
+
+  function hslToHex(h, s, l){
+    s/=100; l/=100;
+    const k = n => (n + h/30) % 12;
+    const a = s * Math.min(l, 1-l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n), 1)));
+    const toHex = x => Math.round(255*x).toString(16).padStart(2,'0');
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`.toUpperCase();
+  }
+
+  function hexToHsl(hex){
+    const m = hex.replace('#','');
+    const r = parseInt(m.substr(0,2),16)/255;
+    const g = parseInt(m.substr(2,2),16)/255;
+    const b = parseInt(m.substr(4,2),16)/255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    let h, s, l = (max+min)/2;
+    if (max === min){ h = 0; s = 0; }
+    else{
+      const d = max-min;
+      s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+      switch(max){
+        case r: h = (g-b)/d + (g<b?6:0); break;
+        case g: h = (b-r)/d + 2; break;
+        default: h = (r-g)/d + 4;
+      }
+      h *= 60;
+    }
+    return [h, s*100, l*100];
+  }
+
+  function hslToRgbArr(h, s, l){
+    const hex = hslToHex(h, s, l);
+    return [
+      parseInt(hex.substr(1,2),16),
+      parseInt(hex.substr(3,2),16),
+      parseInt(hex.substr(5,2),16)
+    ];
+  }
+
+  function drawWheel(){
+    const img = wheelCtx.createImageData(wheelSize, wheelSize);
+    for (let y=0; y<wheelSize; y++){
+      for (let x=0; x<wheelSize; x++){
+        const dx = x - wheelRadius, dy = y - wheelRadius;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const idx = (y*wheelSize + x) * 4;
+        if (dist <= wheelRadius){
+          let angle = Math.atan2(dy, dx) * 180/Math.PI;
+          if (angle < 0) angle += 360;
+          const sat = Math.min(100, (dist/wheelRadius)*100);
+          const [r,g,b] = hslToRgbArr(angle, sat, 50);
+          img.data[idx] = r; img.data[idx+1] = g; img.data[idx+2] = b;
+          img.data[idx+3] = 255;
+        } else {
+          img.data[idx+3] = 0;
+        }
+      }
+    }
+    wheelCtx.putImageData(img, 0, 0);
+  }
+
+  function setCursorFromHueSat(h, s){
+    const angle = h * Math.PI/180;
+    const r = (s/100) * wheelRadius;
+    const x = wheelRadius + r * Math.cos(angle);
+    const y = wheelRadius + r * Math.sin(angle);
+    paletteWheelCursor.style.left = x + 'px';
+    paletteWheelCursor.style.top = y + 'px';
+  }
+
+  function updatePreviewAndHex(){
+    const l = Number(paletteLightness.value);
+    const hex = hslToHex(pickerHue, pickerSat, l);
+    palettePreview.style.background = hex;
+    paletteHexInput.value = hex;
+  }
+
+  function pickFromEvent(e){
+    const rect = paletteWheel.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const x = clientX - rect.left - wheelRadius;
+    const y = clientY - rect.top - wheelRadius;
+    const dist = Math.min(Math.sqrt(x*x + y*y), wheelRadius);
+    let angle = Math.atan2(y, x) * 180/Math.PI;
+    if (angle < 0) angle += 360;
+    pickerHue = angle;
+    pickerSat = (dist/wheelRadius) * 100;
+    setCursorFromHueSat(pickerHue, pickerSat);
+    updatePreviewAndHex();
+  }
+
+  let wheelDragging = false;
+  paletteWheel.addEventListener('mousedown', e => { wheelDragging = true; pickFromEvent(e); });
+  window.addEventListener('mousemove', e => { if (wheelDragging) pickFromEvent(e); });
+  window.addEventListener('mouseup', () => { wheelDragging = false; });
+  paletteWheel.addEventListener('touchstart', e => { wheelDragging = true; pickFromEvent(e); });
+  window.addEventListener('touchmove', e => { if (wheelDragging) pickFromEvent(e); });
+  window.addEventListener('touchend', () => { wheelDragging = false; });
+
+  paletteLightness.addEventListener('input', updatePreviewAndHex);
+
+  paletteHexInput.addEventListener('change', () => {
+    let hex = paletteHexInput.value.trim();
+    if (!/^#?[0-9a-fA-F]{6}$/.test(hex)) { updatePreviewAndHex(); return; }
+    if (hex[0] !== '#') hex = '#' + hex;
+    hex = hex.toUpperCase();
+    const [h,s,l] = hexToHsl(hex);
+    pickerHue = h; pickerSat = s;
+    paletteLightness.value = Math.round(l);
+    setCursorFromHueSat(h, s);
+    palettePreview.style.background = hex;
+    paletteHexInput.value = hex;
+  });
+
+  paletteApplyBtn.addEventListener('click', () => {
+    const hex = paletteHexInput.value;
+    applyTitleColor(hex);
+    try{ localStorage.setItem('ors_title_color', hex); }catch(e){}
+    palettePop.classList.remove('show');
+  });
+
+  drawWheel();
+  setCursorFromHueSat(pickerHue, pickerSat);
+  updatePreviewAndHex();
+
+  paletteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    palettePop.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if (!palettePop.contains(e.target) && e.target !== paletteBtn && !paletteBtn.contains(e.target)){
+      palettePop.classList.remove('show');
+    }
+  });
+
+  bgFileInput.addEventListener('change', () => {
+    const file = bgFileInput.files && bgFileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      applyBackgroundAndColor(dataUrl);
+      try{ localStorage.setItem('ors_hero_bg', dataUrl); }catch(e){}
+    };
+    reader.readAsDataURL(file);
+  });
+
+  bgResetBtn.addEventListener('click', () => {
+    bgConfirmOverlay.classList.add('show');
+  });
+  bgConfirmCancel.addEventListener('click', () => {
+    bgConfirmOverlay.classList.remove('show');
+  });
+  bgConfirmOverlay.addEventListener('click', (e) => {
+    if (e.target === bgConfirmOverlay) bgConfirmOverlay.classList.remove('show');
+  });
+  bgConfirmOk.addEventListener('click', () => {
+    applyHeroBackground(null);
+    resetTitleColor();
+    try{
+      localStorage.removeItem('ors_hero_bg');
+      localStorage.removeItem('ors_title_color');
+    }catch(e){}
+    bgConfirmOverlay.classList.remove('show');
+  });
+
+  try{
+    const savedBg = localStorage.getItem('ors_hero_bg');
+    const savedColor = localStorage.getItem('ors_title_color');
+    if (savedBg){
+      applyHeroBackground(savedBg);
+      if (savedColor) applyTitleColor(savedColor);
+    }
+  }catch(e){}
+
+  /* ---------------------------------------------------------------
+     Dark theme toggle (iOS-style switch)
+  --------------------------------------------------------------- */
+  const themeToggle = document.getElementById('themeToggle');
+  const themeToggleIcon = document.getElementById('themeToggleIcon');
+  const htmlEl = document.documentElement;
+
+  const sunIcon = `<circle cx="12" cy="12" r="5" stroke="#F0A400" stroke-width="2"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="#F0A400" stroke-width="2" stroke-linecap="round"/>`;
+  const moonIcon = `<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke="#5C6B85" stroke-width="1.8" stroke-linejoin="round" fill="#5C6B85"/>`;
+
+  function applyTheme(isDark){
+    htmlEl.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    themeToggle.classList.toggle('on', isDark);
+    themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+    themeToggleIcon.innerHTML = isDark ? moonIcon : sunIcon;
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const isDark = !themeToggle.classList.contains('on');
+    applyTheme(isDark);
+    try{ localStorage.setItem('ors_theme', isDark ? 'dark' : 'light'); }catch(e){}
+  });
+
+  try{
+    const savedTheme = localStorage.getItem('ors_theme');
+    if (savedTheme){
+      applyTheme(savedTheme === 'dark');
+    } else {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(prefersDark);
+    }
+  }catch(e){
+    applyTheme(false);
+  }
+
   document.getElementById('mainSearchBtn').addEventListener('click', openSearch);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') openSearch(); });
   document.getElementById('goSelected').addEventListener('click', openSearch);
@@ -753,14 +1657,19 @@
   renderMisc();
   renderRegionFilter();
   renderGrid();
+  renderPinned();
 
   document.getElementById('brandText').addEventListener('click', () => {
     setMode(mode === 'wiki' ? 'normal' : 'wiki');
     input.focus();
   });
 
-  document.getElementById('backToBrowserBtn').addEventListener('click', () => {
+  document.getElementById('tabNormal').addEventListener('click', () => {
     setMode('normal');
+    input.focus();
+  });
+  document.getElementById('tabWiki').addEventListener('click', () => {
+    setMode('wiki');
     input.focus();
   });
 
@@ -770,10 +1679,12 @@
       selected = savedEngine;
     }
     const savedMode = localStorage.getItem('ors_mode');
-    if (savedMode === 'wiki'){
-      setMode('wiki');
-    }
-  }catch(e){}
+    const initialMode = savedMode === 'wiki' ? 'wiki' : 'normal';
+    applyModeSilently(initialMode);
+    history.replaceState({ orsMode: initialMode }, '', location.pathname + location.search);
+  }catch(e){
+    applyModeSilently('normal');
+  }
   renderGrid();
 
   const urlParams = new URLSearchParams(window.location.search);
