@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,22 +18,43 @@
     --ink-soft:#5C6B85;
     --line:#DCE7F7;
     --radius:16px;
+    --topbar-bg:#0B2545;
+    --hero-from:#134E9B;
+    --hero-to:#1C6FD6;
+    --brand-color:#FFFFFF;
+    --btn-search:#134E9B;
+    --btn-search-hover:#0B2545;
+    --pin-bg:rgba(255,255,255,.14);
+    --pin-border:rgba(255,255,255,.25);
+    --pin-hover:rgba(255,255,255,.24);
+    --placeholder:#9DB2CE;
   }
+  /* ===== ТЁМНАЯ (СЕРАЯ) ТЕМА — ЕДИНЫЙ ФОН ВЕЗДЕ ===== */
   :root[data-theme="dark"]{
     color-scheme:dark;
-    --blue-900:#050F1D;
-    --blue-700:#123A6E;
-    --blue-500:#1C5CA8;
-    --blue-100:#16223B;
-    --paper:#0B1220;
-    --surface:#141E32;
-    --ink:#E7ECF6;
-    --ink-soft:#93A2C2;
-    --line:#233152;
+    --blue-900:#141414;
+    --blue-700:#2A2A2A;
+    --blue-500:#4A4A4A;
+    --blue-100:#1E1E1E;
+    --paper:#1A1A1A;
+    --surface:#1E1E1E;
+    --ink:#E0E0E0;
+    --ink-soft:#A0A0A0;
+    --line:#333333;
+    --topbar-bg:#1A1A1A;
+    --hero-from:#1A1A1A;
+    --hero-to:#1A1A1A;
+    --brand-color:#FFFFFF;
+    --btn-search:#2B7FFF;
+    --btn-search-hover:#1A6AEE;
+    --pin-bg:rgba(255,255,255,.22);
+    --pin-border:rgba(255,255,255,.42);
+    --pin-hover:rgba(255,255,255,.34);
+    --placeholder:#A8A8A8;
   }
   body, .panel, .engine-card, .misc-card, .wiki-item, .search-box, .wiki-modal,
-  .bg-confirm-box, .palette-pop{
-    transition:background-color .25s ease, color .25s ease, border-color .25s ease;
+  .bg-confirm-box, .palette-pop, .topbar, .hero{
+    transition:background-color .25s ease, color .25s ease, border-color .25s ease, background .25s ease;
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
   body{
@@ -46,27 +67,30 @@
   }
 
   .topbar{
-    background:var(--blue-900);
+    background:var(--topbar-bg);
     color:#fff;
     padding:10px 24px;
     display:flex;
     align-items:center;
     justify-content:space-between;
     font-size:13px;
+    margin-top:auto;
+    z-index:50;
   }
   .topbar .brandmark{
     font-weight:800;
     letter-spacing:.2px;
-    color:#FF7A29;
+    color:var(--brand-color);
     transition:color .3s;
   }
-  .topbar .brandmark b{ color:#FF7A29; }
+  .topbar .brandmark b{ color:var(--brand-color); }
   .topbar nav a{
     color:#B9D3F5;
     text-decoration:none;
     margin-left:18px;
     font-weight:500;
   }
+  :root[data-theme="dark"] .topbar nav a{ color:#A8A8A8; }
   .topbar nav a:hover{ color:#fff; }
   .topbar nav{ display:flex; align-items:center; gap:14px; }
 
@@ -121,6 +145,7 @@
     padding:0;
     transition:background .15s, color .15s;
   }
+  :root[data-theme="dark"] .bg-switch-btn{ color:#A8A8A8; }
   .bg-switch-btn:hover{ background:rgba(255,255,255,.24); color:#fff; }
   .bg-switch-btn svg{ display:block; }
   .bg-reset-btn{
@@ -154,16 +179,17 @@
     padding:0;
     transition:background .15s, color .15s;
   }
+  :root[data-theme="dark"] .palette-btn{ color:#A8A8A8; }
   .palette-btn:hover{ background:rgba(255,255,255,.24); color:#fff; }
   .palette-btn svg{ display:block; }
   .palette-pop{
     display:none;
     position:absolute;
-    top:36px;
+    bottom:36px;
     right:0;
     background:var(--surface);
     border-radius:14px;
-    box-shadow:0 18px 40px rgba(11,37,69,.35);
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
     padding:16px;
     z-index:150;
     width:220px;
@@ -246,7 +272,7 @@
     display:none;
     position:fixed;
     inset:0;
-    background:rgba(11,37,69,.55);
+    background:rgba(0,0,0,.55);
     z-index:200;
     align-items:center;
     justify-content:center;
@@ -259,7 +285,7 @@
     max-width:360px;
     width:100%;
     padding:22px 22px 18px;
-    box-shadow:0 30px 60px rgba(11,37,69,.4);
+    box-shadow:0 30px 60px rgba(0,0,0,.4);
   }
   .bg-confirm-box h3{
     font-size:16px;
@@ -291,7 +317,7 @@
   .bg-confirm-ok:hover{ background:#c93d2c; }
 
   .hero{
-    background:linear-gradient(180deg, var(--blue-700) 0%, var(--blue-500) 100%);
+    background:linear-gradient(180deg, var(--hero-from) 0%, var(--hero-to) 100%);
     padding:56px 20px 90px;
     text-align:center;
     color:#fff;
@@ -301,7 +327,7 @@
     font-size:44px;
     font-weight:800;
     letter-spacing:-.5px;
-    color:#FF7A29;
+    color:var(--brand-color);
     transition:color .3s;
   }
   .hero p{
@@ -309,6 +335,7 @@
     color:#D6E7FC;
     font-size:15px;
   }
+  :root[data-theme="dark"] .hero p{ color:#B0B0B0; }
 
   .mode-switch{
     max-width:680px;
@@ -348,7 +375,7 @@
     display:flex;
     align-items:center;
     padding:6px 6px 6px 20px;
-    box-shadow:0 18px 40px rgba(11,37,69,.35);
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
   }
   .search-box .search-icon{
     flex-shrink:0;
@@ -365,9 +392,9 @@
     color:var(--ink);
     background:transparent;
   }
-  .search-box input::placeholder{ color:#9DB2CE; }
+  .search-box input::placeholder{ color:var(--placeholder); }
   .search-box button{
-    background:var(--blue-700);
+    background:var(--btn-search);
     color:#fff;
     border:none;
     font-weight:600;
@@ -378,7 +405,7 @@
     transition:transform .15s, background .15s;
     white-space:nowrap;
   }
-  .search-box button:hover{ background:var(--blue-900); transform:scale(1.03); }
+  .search-box button:hover{ background:var(--btn-search-hover); transform:scale(1.03); }
 
   .quick-row{
     margin-top:16px;
@@ -389,15 +416,16 @@
     align-items:center;
   }
   .quick-row span{
-    background:rgba(255,255,255,.14);
+    background:var(--pin-bg);
     color:#fff;
     font-size:12.5px;
     padding:6px 14px;
     border-radius:999px;
     cursor:pointer;
-    border:1px solid rgba(255,255,255,.25);
+    border:1px solid var(--pin-border);
+    transition:background .15s;
   }
-  .quick-row span:hover{ background:rgba(255,255,255,.24); }
+  .quick-row span:hover{ background:var(--pin-hover); }
 
   .content{
     max-width:920px;
@@ -413,7 +441,7 @@
     background:var(--surface);
     border-radius:var(--radius);
     border:1px solid var(--line);
-    box-shadow:0 4px 24px rgba(11,37,69,.06);
+    box-shadow:0 4px 24px rgba(0,0,0,.06);
     padding:26px 26px 24px;
     margin-bottom:22px;
   }
@@ -434,7 +462,7 @@
   }
 
   .quick-row span.pin-btn{
-    background:rgba(255,255,255,.1);
+    background:rgba(255,255,255,.12);
     border-style:dashed;
     display:inline-flex;
     align-items:center;
@@ -444,7 +472,7 @@
     font-weight:700;
     font-size:14px;
   }
-  .quick-row span.pin-btn:hover{ background:rgba(255,255,255,.24); }
+  .quick-row span.pin-btn:hover{ background:var(--pin-hover); }
   .quick-row span.pin-btn.editing{
     background:#FF7A29;
     border-color:#FF7A29;
@@ -521,11 +549,17 @@
     cursor:pointer;
     border:1px solid var(--line);
   }
+  :root[data-theme="dark"] .region-chip{ color:#D0D0D0; }
   .region-chip:hover{ background:var(--surface); border-color:var(--blue-500); }
   .region-chip.active{
     background:var(--blue-700);
     color:#fff;
     border-color:var(--blue-700);
+  }
+  :root[data-theme="dark"] .region-chip.active{
+    background:#2B7FFF;
+    color:#fff;
+    border-color:#2B7FFF;
   }
 
   .engine-grid{
@@ -584,6 +618,7 @@
     margin-top:14px;
   }
   .selected-note b{ color:var(--blue-700); }
+  :root[data-theme="dark"] .selected-note b{ color:#2B7FFF; }
 
   .go-all{
     margin-top:16px;
@@ -599,8 +634,8 @@
     cursor:pointer;
     border:none;
   }
-  .btn-primary{ background:var(--blue-700); color:#fff; }
-  .btn-primary:hover{ background:var(--blue-900); }
+  .btn-primary{ background:var(--btn-search); color:#fff; }
+  .btn-primary:hover{ background:var(--btn-search-hover); }
 
   .hint{
     font-size:12.5px;
@@ -613,7 +648,7 @@
     display:none;
     position:fixed;
     inset:0;
-    background:rgba(11,37,69,.55);
+    background:rgba(0,0,0,.55);
     z-index:100;
     align-items:flex-start;
     justify-content:center;
@@ -626,7 +661,7 @@
     border-radius:var(--radius);
     max-width:640px;
     width:100%;
-    box-shadow:0 30px 60px rgba(11,37,69,.4);
+    box-shadow:0 30px 60px rgba(0,0,0,.4);
     overflow:hidden;
   }
   .wiki-modal-head{
@@ -676,6 +711,7 @@
     color:var(--blue-700);
     margin-bottom:4px;
   }
+  :root[data-theme="dark"] .wiki-item .wiki-title{ color:#2B7FFF; }
   .wiki-item .wiki-snippet{
     font-size:13px;
     color:var(--ink-soft);
@@ -743,69 +779,17 @@
     .search-box button{ padding:11px 16px; font-size:13px; }
     .engine-grid{ grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); }
     .mode-switch{ flex-wrap:wrap; }
+    .topbar{ padding:10px 14px; font-size:12px; }
+    .topbar nav a{ margin-left:10px; }
   }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brandmark" id="brandText" style="cursor:pointer;" title="Вернуться к обычному поиску">Open <b>Ru</b> Search</div>
-  <nav>
-    <a href="https://github.com/ARTEMPRO01MINETEXNICK" target="_blank" rel="noopener">Разработчик</a>
-    <button class="bg-switch-btn" id="bgSwitchBtn" type="button" title="Сменить фон">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
-        <circle cx="8.5" cy="9.5" r="1.5" stroke="currentColor" stroke-width="1.6"/>
-        <path d="M21 15l-5.5-5.5a1.5 1.5 0 0 0-2.12 0L4 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <button class="bg-reset-btn" id="bgResetBtn" type="button" title="Сбросить фон">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 12a9 9 0 1 1 3 6.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M3 19v-5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <input type="file" id="bgFileInput" accept="image/*" style="display:none;">
-    <div class="palette-wrap">
-      <button class="palette-btn" id="paletteBtn" type="button" title="Цвет надписи">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.7 1.8-1.6 0-.4-.16-.77-.42-1.07-.27-.3-.43-.65-.43-1.03 0-.9.72-1.6 1.6-1.6H16.5A4.5 4.5 0 0 0 21 11.25C21 6.7 16.97 3 12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-          <circle cx="7.5" cy="10.5" r="1.1" fill="currentColor"/>
-          <circle cx="11" cy="7.2" r="1.1" fill="currentColor"/>
-          <circle cx="15.2" cy="7.6" r="1.1" fill="currentColor"/>
-          <circle cx="17.3" cy="11.5" r="1.1" fill="currentColor"/>
-        </svg>
-      </button>
-      <div class="palette-pop" id="palettePop">
-        <div class="palette-wheel-wrap">
-          <canvas class="palette-wheel" id="paletteWheel" width="170" height="170"></canvas>
-          <div class="palette-wheel-cursor" id="paletteWheelCursor"></div>
-        </div>
-        <div class="palette-lightness-row">
-          <input type="range" id="paletteLightness" min="0" max="100" value="50">
-          <div class="palette-preview" id="palettePreview"></div>
-        </div>
-        <div class="palette-hex-row">
-          <input type="text" id="paletteHexInput" value="#FF4F00" maxlength="7">
-          <button class="palette-apply-btn" id="paletteApplyBtn" type="button">ОК</button>
-        </div>
-      </div>
-    </div>
-    <button class="theme-toggle" id="themeToggle" type="button" title="Тёмная тема" aria-pressed="false">
-      <span class="theme-toggle-knob">
-        <svg id="themeToggleIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="5" stroke="#F0A400" stroke-width="2"/>
-          <path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="#F0A400" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </span>
-    </button>
-  </nav>
-</div>
-
 <div class="bg-confirm-overlay" id="bgConfirmOverlay">
   <div class="bg-confirm-box">
     <h3>Сбросить фон?</h3>
-    <p>Загруженная картинка будет удалена, и фон вернётся к стандартному синему градиенту. Это действие нельзя отменить.</p>
+    <p>Загруженная картинка будет удалена, и фон вернётся к стандартному градиенту. Это действие нельзя отменить.</p>
     <div class="bg-confirm-actions">
       <button class="bg-confirm-cancel" id="bgConfirmCancel">Отмена</button>
       <button class="bg-confirm-ok" id="bgConfirmOk">Сбросить</button>
@@ -874,6 +858,60 @@
     </p>
   </div>
 
+</div>
+
+<div class="topbar">
+  <div class="brandmark" id="brandText" style="cursor:pointer;" title="Вернуться к обычному поиску">Open <b>Ru</b> Search</div>
+  <nav>
+    <a href="https://github.com/ARTEMPRO01MINETEXNICK" target="_blank" rel="noopener">Разработчик</a>
+    <button class="bg-switch-btn" id="bgSwitchBtn" type="button" title="Сменить фон">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="8.5" cy="9.5" r="1.5" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M21 15l-5.5-5.5a1.5 1.5 0 0 0-2.12 0L4 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="bg-reset-btn" id="bgResetBtn" type="button" title="Сбросить фон">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 12a9 9 0 1 1 3 6.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M3 19v-5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <input type="file" id="bgFileInput" accept="image/*" style="display:none;">
+    <div class="palette-wrap">
+      <button class="palette-btn" id="paletteBtn" type="button" title="Цвет надписи">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.7 1.8-1.6 0-.4-.16-.77-.42-1.07-.27-.3-.43-.65-.43-1.03 0-.9.72-1.6 1.6-1.6H16.5A4.5 4.5 0 0 0 21 11.25C21 6.7 16.97 3 12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <circle cx="7.5" cy="10.5" r="1.1" fill="currentColor"/>
+          <circle cx="11" cy="7.2" r="1.1" fill="currentColor"/>
+          <circle cx="15.2" cy="7.6" r="1.1" fill="currentColor"/>
+          <circle cx="17.3" cy="11.5" r="1.1" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="palette-pop" id="palettePop">
+        <div class="palette-wheel-wrap">
+          <canvas class="palette-wheel" id="paletteWheel" width="170" height="170"></canvas>
+          <div class="palette-wheel-cursor" id="paletteWheelCursor"></div>
+        </div>
+        <div class="palette-lightness-row">
+          <input type="range" id="paletteLightness" min="0" max="100" value="50">
+          <div class="palette-preview" id="palettePreview"></div>
+        </div>
+        <div class="palette-hex-row">
+          <input type="text" id="paletteHexInput" value="#FF4F00" maxlength="7">
+          <button class="palette-apply-btn" id="paletteApplyBtn" type="button">ОК</button>
+        </div>
+      </div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button" title="Тёмная тема" aria-pressed="false">
+      <span class="theme-toggle-knob">
+        <svg id="themeToggleIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="5" stroke="#F0A400" stroke-width="2"/>
+          <path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="#F0A400" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </button>
+  </nav>
 </div>
 
 <div class="wiki-modal-overlay" id="wikiModalOverlay">
@@ -1280,7 +1318,7 @@
   }
   function applyHeroBackground(dataUrl){
     if (dataUrl){
-      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(11,37,69,.45), rgba(11,37,69,.45)), url("${dataUrl}")`;
+      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.45)), url("${dataUrl}")`;
       heroEl.style.backgroundSize = 'cover';
       heroEl.style.backgroundPosition = 'center';
       heroEl.style.backgroundRepeat = 'no-repeat';
@@ -1480,7 +1518,7 @@
   const htmlEl = document.documentElement;
 
   const sunIcon = `<circle cx="12" cy="12" r="5" stroke="#F0A400" stroke-width="2"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="#F0A400" stroke-width="2" stroke-linecap="round"/>`;
-  const moonIcon = `<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke="#5C6B85" stroke-width="1.8" stroke-linejoin="round" fill="#5C6B85"/>`;
+  const moonIcon = `<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke="#A8A8A8" stroke-width="1.8" stroke-linejoin="round" fill="#A8A8A8"/>`;
 
   function applyTheme(isDark){
     htmlEl.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -1498,10 +1536,9 @@
     if (savedTheme){
       applyTheme(savedTheme === 'dark');
     } else {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      applyTheme(prefersDark);
+      applyTheme(true);
     }
-  }catch(e){ applyTheme(false); }
+  }catch(e){ applyTheme(true); }
 
   document.getElementById('mainSearchBtn').addEventListener('click', openSearch);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') openSearch(); });
