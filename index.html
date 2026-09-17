@@ -22,17 +22,19 @@
     --hero-from:#134E9B;
     --hero-to:#1C6FD6;
     --brand-color:#FFFFFF;
-    --btn-search:#134E9B;
-    --btn-search-hover:#0B2545;
-    --pin-bg:rgba(255,255,255,.14);
-    --pin-border:rgba(255,255,255,.25);
-    --pin-hover:rgba(255,255,255,.24);
+    --btn-search:#0B2545;
+    --btn-search-hover:#051526;
+    --btn-text:#FFFFFF;
+    --pin-bg:rgba(255,255,255,.18);
+    --pin-border:rgba(255,255,255,.35);
+    --pin-hover:rgba(255,255,255,.3);
     --placeholder:#9DB2CE;
     --box-bg:#FFFFFF;
+    --box-text:#16233A;
     --card-bg:#EAF2FC;
-    --card-bg-hover:#FFFFFF;
+    --card-bg-hover:#D6E5F8;
+    --card-text:#16233A;
   }
-  /* ===== ТЁМНАЯ ТЕМА: ФОН #232323, ЭЛЕМЕНТЫ #6E6E6E ===== */
   :root[data-theme="dark"]{
     color-scheme:dark;
     --blue-900:#5A5A5A;
@@ -48,15 +50,18 @@
     --hero-from:#232323;
     --hero-to:#232323;
     --brand-color:#FFFFFF;
-    --btn-search:#6E6E6E;
-    --btn-search-hover:#5A5A5A;
+    --btn-search:#4A4A4A;
+    --btn-search-hover:#3A3A3A;
+    --btn-text:#FFFFFF;
     --pin-bg:#6E6E6E;
     --pin-border:#8A8A8A;
     --pin-hover:#5A5A5A;
     --placeholder:#E0E0E0;
     --box-bg:#6E6E6E;
+    --box-text:#FFFFFF;
     --card-bg:#6E6E6E;
     --card-bg-hover:#5A5A5A;
+    --card-text:#FFFFFF;
   }
   body, .panel, .engine-card, .misc-card, .wiki-item, .search-box, .wiki-modal,
   .bg-confirm-box, .palette-pop, .topbar, .hero, .mode-tab, .region-chip, .quick-row span{
@@ -82,6 +87,8 @@
     font-size:13px;
     margin-top:auto;
     z-index:50;
+    flex-wrap:wrap;
+    gap:10px;
   }
   .topbar .brandmark{
     font-weight:800;
@@ -98,7 +105,45 @@
   }
   :root[data-theme="dark"] .topbar nav a{ color:#D0D0D0; }
   .topbar nav a:hover{ color:#fff; }
-  .topbar nav{ display:flex; align-items:center; gap:14px; }
+  .topbar nav{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+
+  .ai-toggle-wrap{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    color:#DCE7F7;
+    cursor:pointer;
+    user-select:none;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.18);
+    padding:4px 10px;
+    border-radius:999px;
+  }
+  :root[data-theme="dark"] .ai-toggle-wrap{ color:#E0E0E0; border-color:#3A3A3A; background:rgba(0,0,0,.25); }
+  .ai-toggle-wrap input{
+    appearance:none;
+    -webkit-appearance:none;
+    width:32px; height:16px;
+    background:#555;
+    border-radius:999px;
+    position:relative;
+    cursor:pointer;
+    outline:none;
+    transition:background .2s;
+    flex-shrink:0;
+  }
+  .ai-toggle-wrap input::after{
+    content:'';
+    position:absolute;
+    top:2px; left:2px;
+    width:12px; height:12px;
+    border-radius:50%;
+    background:#fff;
+    transition:transform .2s;
+  }
+  .ai-toggle-wrap input:checked{ background:#34C759; }
+  .ai-toggle-wrap input:checked::after{ transform:translateX(16px); }
 
   .theme-toggle{
     position:relative;
@@ -132,12 +177,8 @@
     justify-content:center;
     transition:transform .25s cubic-bezier(.4,0,.2,1);
   }
-  .theme-toggle.on .theme-toggle-knob{
-    transform:translateX(20px);
-  }
-  .theme-toggle .theme-toggle-knob svg{
-    width:12px; height:12px;
-  }
+  .theme-toggle.on .theme-toggle-knob{ transform:translateX(20px); }
+  .theme-toggle .theme-toggle-knob svg{ width:12px; height:12px; }
   .bg-switch-btn{
     background:#6E6E6E;
     border:1px solid #8A8A8A;
@@ -151,7 +192,9 @@
     padding:0;
     transition:background .15s, color .15s;
   }
+  :root:not([data-theme="dark"]) .bg-switch-btn{ background:#2E5FA0; border-color:#2E5FA0; }
   .bg-switch-btn:hover{ background:#5A5A5A; color:#fff; }
+  :root:not([data-theme="dark"]) .bg-switch-btn:hover{ background:#1D4A85; }
   .bg-switch-btn svg{ display:block; }
   .bg-reset-btn{
     background:#6E6E6E;
@@ -166,6 +209,7 @@
     padding:0;
     transition:background .15s, color .15s;
   }
+  :root:not([data-theme="dark"]) .bg-reset-btn{ background:#2E5FA0; border-color:#2E5FA0; }
   .bg-reset-btn.show{ display:inline-flex; }
   .bg-reset-btn:hover{ background:#c93d2c; color:#fff; }
   .bg-reset-btn svg{ display:block; }
@@ -184,7 +228,9 @@
     padding:0;
     transition:background .15s, color .15s;
   }
+  :root:not([data-theme="dark"]) .palette-btn{ background:#2E5FA0; border-color:#2E5FA0; }
   .palette-btn:hover{ background:#5A5A5A; color:#fff; }
+  :root:not([data-theme="dark"]) .palette-btn:hover{ background:#1D4A85; }
   .palette-btn svg{ display:block; }
   .palette-pop{
     display:none;
@@ -201,53 +247,25 @@
     align-items:center;
     gap:12px;
   }
+  :root:not([data-theme="dark"]) .palette-pop{ background:#FFFFFF; }
   .palette-pop.show{ display:flex; }
-  .palette-wheel-wrap{
-    position:relative;
-    width:170px;
-    height:170px;
-  }
-  .palette-wheel{
-    width:170px;
-    height:170px;
-    border-radius:50%;
-    cursor:crosshair;
-    display:block;
-  }
+  .palette-wheel-wrap{ position:relative; width:170px; height:170px; }
+  .palette-wheel{ width:170px; height:170px; border-radius:50%; cursor:crosshair; display:block; }
   .palette-wheel-cursor{
-    position:absolute;
-    width:14px;
-    height:14px;
-    border-radius:50%;
+    position:absolute; width:14px; height:14px; border-radius:50%;
     border:2px solid #fff;
     box-shadow:0 0 0 1px rgba(0,0,0,.4), 0 1px 4px rgba(0,0,0,.35);
-    transform:translate(-50%,-50%);
-    pointer-events:none;
-    top:0; left:0;
+    transform:translate(-50%,-50%); pointer-events:none; top:0; left:0;
   }
-  .palette-lightness-row{
-    width:100%;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  .palette-lightness-row input[type="range"]{
-    flex:1;
-    height:14px;
-    cursor:pointer;
-  }
+  .palette-lightness-row{ width:100%; display:flex; align-items:center; gap:8px; }
+  .palette-lightness-row input[type="range"]{ flex:1; height:14px; cursor:pointer; }
   .palette-preview{
-    width:22px; height:22px;
-    border-radius:50%;
+    width:22px; height:22px; border-radius:50%;
     border:2px solid #fff;
     box-shadow:0 0 0 1px var(--line);
     flex-shrink:0;
   }
-  .palette-hex-row{
-    width:100%;
-    display:flex;
-    gap:8px;
-  }
+  .palette-hex-row{ width:100%; display:flex; gap:8px; }
   .palette-hex-row input[type="text"]{
     flex:1;
     border:1px solid var(--line);
@@ -259,10 +277,9 @@
     min-width:0;
     background:#fff;
   }
-  .palette-hex-row input[type="text"]:focus{ border-color:var(--blue-500); }
   .palette-apply-btn{
     background:var(--btn-search);
-    color:#fff;
+    color:var(--btn-text);
     border:none;
     font-weight:600;
     font-size:12.5px;
@@ -292,36 +309,18 @@
     padding:22px 22px 18px;
     box-shadow:0 30px 60px rgba(0,0,0,.6);
   }
-  .bg-confirm-box h3{
-    font-size:16px;
-    margin-bottom:8px;
-    color:var(--ink);
-  }
-  .bg-confirm-box p{
-    font-size:13px;
-    color:var(--ink-soft);
-    line-height:1.5;
-    margin-bottom:18px;
-  }
-  .bg-confirm-actions{
-    display:flex;
-    gap:10px;
-    justify-content:flex-end;
-  }
+  :root:not([data-theme="dark"]) .bg-confirm-box{ background:#FFFFFF; }
+  .bg-confirm-box h3{ font-size:16px; margin-bottom:8px; color:var(--ink); }
+  .bg-confirm-box p{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin-bottom:18px; }
+  .bg-confirm-actions{ display:flex; gap:10px; justify-content:flex-end; }
   .bg-confirm-actions button{
-    font-weight:600;
-    font-size:13px;
-    padding:9px 16px;
-    border-radius:9px;
-    cursor:pointer;
-    border:none;
+    font-weight:600; font-size:13px; padding:9px 16px; border-radius:9px; cursor:pointer; border:none;
   }
   .bg-confirm-cancel{ background:#8A8A8A; color:#fff; }
   .bg-confirm-cancel:hover{ background:#5A5A5A; }
   .bg-confirm-ok{ background:#E24C3A; color:#fff; }
   .bg-confirm-ok:hover{ background:#c93d2c; }
 
-  /* ===== HERO: СТРОКА ПОИСКА ПО ЦЕНТРУ ===== */
   .hero{
     background:linear-gradient(180deg, var(--hero-from) 0%, var(--hero-to) 100%);
     min-height:100vh;
@@ -341,11 +340,7 @@
     color:var(--brand-color);
     transition:color .3s;
   }
-  .hero p{
-    margin-top:10px;
-    color:#D6E7FC;
-    font-size:15px;
-  }
+  .hero p{ margin-top:10px; color:#D6E7FC; font-size:15px; }
   :root[data-theme="dark"] .hero p{ color:#D0D0D0; }
 
   .mode-switch{
@@ -360,7 +355,7 @@
     align-items:center;
     gap:8px;
     background:var(--card-bg);
-    color:#FFFFFF;
+    color:var(--card-text);
     font-weight:600;
     font-size:15px;
     padding:9px 20px 9px 14px;
@@ -370,10 +365,7 @@
     transition:border-color .15s, background .15s, transform .12s;
   }
   .mode-tab:hover{ transform:translateY(-1px); background:var(--card-bg-hover); }
-  .mode-tab.active{
-    border-color:#FFFFFF;
-    background:var(--card-bg-hover);
-  }
+  .mode-tab.active{ background:var(--card-bg-hover); border-color:transparent; }
 
   .search-wrap{
     max-width:680px;
@@ -381,7 +373,6 @@
     margin:22px auto 0;
     position:relative;
   }
-  /* Строка поиска #6E6E6E */
   .search-box{
     background:var(--box-bg);
     border-radius:999px;
@@ -392,10 +383,7 @@
     border:1px solid var(--line);
   }
   .search-box .search-icon{
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    margin-right:4px;
+    flex-shrink:0; display:flex; align-items:center; margin-right:4px;
   }
   .search-box input{
     flex:1;
@@ -403,26 +391,35 @@
     outline:none;
     font-size:16px;
     padding:12px 8px;
-    color:#FFFFFF;
+    color:var(--box-text);
     background:transparent;
+    min-width:0;
   }
   .search-box input::placeholder{ color:var(--placeholder); }
-  /* Кнопка Искать #6E6E6E */
   .search-box button{
     background:var(--btn-search);
-    color:#FFFFFF;
-    border:1px solid #8A8A8A;
+    color:var(--btn-text);
+    border:1px solid rgba(0,0,0,.1);
     font-weight:600;
     font-size:14px;
-    padding:13px 26px;
+    padding:13px 22px;
     border-radius:999px;
     cursor:pointer;
     transition:transform .15s, background .15s;
     white-space:nowrap;
   }
+  :root[data-theme="dark"] .search-box button{ border-color:#5A5A5A; }
   .search-box button:hover{ background:var(--btn-search-hover); transform:scale(1.03); }
+  #aiSearchBtn{
+    margin-left:6px;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:13px 18px;
+  }
+  #aiSearchBtn svg{ display:block; }
+  #aiSearchBtn.hidden{ display:none; }
 
-  /* Закреплённые кнопки #6E6E6E */
   .quick-row{
     margin-top:16px;
     display:flex;
@@ -433,7 +430,7 @@
   }
   .quick-row span{
     background:var(--pin-bg);
-    color:#FFFFFF;
+    color:var(--pin-text, #FFFFFF);
     font-size:12.5px;
     padding:6px 14px;
     border-radius:999px;
@@ -441,9 +438,9 @@
     border:1px solid var(--pin-border);
     transition:background .15s;
   }
+  :root:not([data-theme="dark"]) .quick-row span{ color:#0B2545; }
   .quick-row span:hover{ background:var(--pin-hover); }
 
-  /* ===== 3 ПРОКРУТКИ ДО ВЫБОРА БРАУЗЕРА ===== */
   .content{
     max-width:920px;
     width:100%;
@@ -462,21 +459,17 @@
     padding:26px 26px 24px;
     margin-bottom:22px;
   }
+  :root:not([data-theme="dark"]) .panel{ background:#FFFFFF; }
   .panel-head{
     display:flex;
     align-items:baseline;
     justify-content:space-between;
     margin-bottom:16px;
   }
-  .panel-head h2{
-    font-size:18px;
-    font-weight:700;
-    color:var(--ink);
-  }
-  .panel-head span{
-    font-size:12.5px;
-    color:var(--ink-soft);
-  }
+  .panel-head h2{ font-size:18px; font-weight:700; color:var(--ink); }
+  :root:not([data-theme="dark"]) .panel-head h2{ color:#16233A; }
+  .panel-head span{ font-size:12.5px; color:var(--ink-soft); }
+  :root:not([data-theme="dark"]) .panel-head span{ color:#5C6B85; }
 
   .quick-row span.pin-btn{
     background:var(--pin-bg);
@@ -523,7 +516,9 @@
     outline:none;
     width:170px;
   }
+  :root:not([data-theme="dark"]) .quick-row .pin-add-input{ background:#fff; color:#16233A; border-color:#DCE7F7; }
   .quick-row .pin-add-input::placeholder{ color:#D0D0D0; }
+  :root:not([data-theme="dark"]) .quick-row .pin-add-input::placeholder{ color:#8FA3BF; }
   .quick-row .pin-save-btn{
     background:#FF7A29;
     color:#fff;
@@ -539,8 +534,7 @@
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    width:16px;
-    height:16px;
+    width:16px; height:16px;
     border-radius:4px;
     background:#008373;
     color:#fff;
@@ -558,19 +552,21 @@
   }
   .region-chip{
     background:var(--card-bg);
-    color:#FFFFFF;
+    color:var(--card-text);
     font-size:12.5px;
     font-weight:600;
     padding:6px 14px;
     border-radius:999px;
     cursor:pointer;
     border:1px solid var(--line);
+    transition:background .15s;
   }
-  .region-chip:hover{ background:var(--card-bg-hover); border-color:#FFFFFF; }
+  :root:not([data-theme="dark"]) .region-chip{ color:#16233A; }
+  .region-chip:hover{ background:var(--card-bg-hover); border-color:transparent; }
   .region-chip.active{
     background:var(--btn-search);
-    color:#fff;
-    border-color:#FFFFFF;
+    color:var(--btn-text);
+    border-color:transparent;
   }
 
   .engine-grid{
@@ -578,7 +574,6 @@
     grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
     gap:12px;
   }
-  /* Карточки поисковиков #6E6E6E */
   .engine-card{
     border:1px solid var(--line);
     border-radius:12px;
@@ -591,16 +586,20 @@
     transition:border-color .15s, transform .12s, background .15s;
     text-align:left;
   }
+  :root:not([data-theme="dark"]) .engine-card{ color:#16233A; }
   .engine-card:hover{
-    border-color:#FFFFFF;
+    border-color:transparent;
     background:var(--card-bg-hover);
     transform:translateY(-2px);
   }
   .engine-card.active{
-    border-color:#FFFFFF;
-    background:var(--card-bg-hover);
-    box-shadow:0 0 0 2px #FFFFFF inset;
+    border-color:transparent;
+    background:var(--btn-search);
+    color:var(--btn-text);
   }
+  :root:not([data-theme="dark"]) .engine-card.active{ color:#FFFFFF; }
+  .engine-card.active .engine-name,
+  .engine-card.active .engine-region{ color:var(--btn-text); }
   .engine-dot{
     width:34px; height:34px;
     border-radius:9px;
@@ -610,32 +609,24 @@
     border:1px solid var(--line);
     overflow:hidden;
   }
-  .engine-dot img{
-    width:22px; height:22px;
-    object-fit:contain;
-  }
-  .engine-name{
-    font-size:13.5px;
-    font-weight:600;
-    color:var(--ink);
-  }
-  .engine-region{
-    font-size:11px;
-    color:var(--ink-soft);
-  }
+  :root:not([data-theme="dark"]) .engine-dot{ background:#FFFFFF; }
+  .engine-dot img{ width:22px; height:22px; object-fit:contain; }
+  .engine-name{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  :root:not([data-theme="dark"]) .engine-name{ color:#16233A; }
+  .engine-region{ font-size:11px; color:var(--ink-soft); }
+  :root:not([data-theme="dark"]) .engine-region{ color:#5C6B85; }
 
-  .selected-note{
-    font-size:12.5px;
-    color:var(--ink-soft);
-    margin-top:14px;
-  }
-  .selected-note b{ color:#FFFFFF; }
+  .selected-note{ font-size:12.5px; color:var(--ink-soft); margin-top:14px; }
+  :root:not([data-theme="dark"]) .selected-note{ color:#5C6B85; }
+  .selected-note b{ color:var(--ink); }
+  :root:not([data-theme="dark"]) .selected-note b{ color:#134E9B; }
 
   .go-all{
     margin-top:16px;
     display:flex;
     gap:10px;
     flex-wrap:wrap;
+    align-items:center;
   }
   .go-all button{
     font-weight:600;
@@ -643,17 +634,21 @@
     padding:11px 20px;
     border-radius:10px;
     cursor:pointer;
-    border:1px solid #8A8A8A;
+    border:1px solid rgba(0,0,0,.1);
+    transition:background .15s, transform .15s;
   }
-  .btn-primary{ background:var(--btn-search); color:#fff; }
-  .btn-primary:hover{ background:var(--btn-search-hover); }
+  :root[data-theme="dark"] .go-all button{ border-color:#5A5A5A; }
+  .btn-primary{ background:var(--btn-search); color:var(--btn-text); }
+  .btn-primary:hover{ background:var(--btn-search-hover); transform:translateY(-1px); }
 
   .hint{
     font-size:12.5px;
     color:var(--ink-soft);
     line-height:1.6;
   }
+  :root:not([data-theme="dark"]) .hint{ color:#5C6B85; }
   .hint strong{ color:var(--ink); }
+  :root:not([data-theme="dark"]) .hint strong{ color:#16233A; }
 
   .wiki-modal-overlay{
     display:none;
@@ -675,18 +670,16 @@
     box-shadow:0 30px 60px rgba(0,0,0,.6);
     overflow:hidden;
   }
+  :root:not([data-theme="dark"]) .wiki-modal{ background:#FFFFFF; }
   .wiki-modal-head{
     background:var(--btn-search);
-    color:#fff;
+    color:var(--btn-text);
     padding:16px 22px;
     display:flex;
     align-items:center;
     justify-content:space-between;
   }
-  .wiki-modal-head h3{
-    font-size:16px;
-    font-weight:700;
-  }
+  .wiki-modal-head h3{ font-size:16px; font-weight:700; }
   .wiki-modal-close{
     background:rgba(255,255,255,.18);
     border:none;
@@ -698,11 +691,7 @@
     line-height:1;
   }
   .wiki-modal-close:hover{ background:rgba(255,255,255,.3); }
-  .wiki-modal-body{
-    padding:18px 22px 22px;
-    max-height:70vh;
-    overflow-y:auto;
-  }
+  .wiki-modal-body{ padding:18px 22px 22px; max-height:70vh; overflow-y:auto; }
 
   .wiki-item{
     border:1px solid var(--line);
@@ -715,28 +704,25 @@
     transition:border-color .15s, background .15s;
     margin-bottom:10px;
   }
-  .wiki-item:hover{ border-color:#FFFFFF; background:var(--card-bg-hover); }
+  :root:not([data-theme="dark"]) .wiki-item{ color:#16233A; }
+  .wiki-item:hover{ border-color:transparent; background:var(--card-bg-hover); }
   .wiki-item .wiki-title{
     font-size:14.5px;
     font-weight:700;
-    color:#FFFFFF;
+    color:var(--btn-text);
     margin-bottom:4px;
   }
-  .wiki-item .wiki-snippet{
-    font-size:13px;
-    color:var(--ink-soft);
-    line-height:1.5;
-  }
+  :root:not([data-theme="dark"]) .wiki-item .wiki-title{ color:#134E9B; }
+  .wiki-item .wiki-snippet{ font-size:13px; color:var(--ink-soft); line-height:1.5; }
+  :root:not([data-theme="dark"]) .wiki-item .wiki-snippet{ color:#5C6B85; }
   .wiki-item .wiki-snippet mark{
     background:none;
     color:var(--ink);
     font-weight:700;
   }
-  .wiki-empty, .wiki-loading{
-    font-size:13px;
-    color:var(--ink-soft);
-    padding:10px 2px;
-  }
+  :root:not([data-theme="dark"]) .wiki-item .wiki-snippet mark{ color:#16233A; }
+  .wiki-empty, .wiki-loading{ font-size:13px; color:var(--ink-soft); padding:10px 2px; }
+  :root:not([data-theme="dark"]) .wiki-empty, :root:not([data-theme="dark"]) .wiki-loading{ color:#5C6B85; }
 
   .misc-grid{
     display:grid;
@@ -757,8 +743,9 @@
     text-decoration:none;
     color:inherit;
   }
+  :root:not([data-theme="dark"]) .misc-card{ color:#16233A; }
   .misc-card:hover{
-    border-color:#FFFFFF;
+    border-color:transparent;
     background:var(--card-bg-hover);
     transform:translateY(-2px);
   }
@@ -771,22 +758,19 @@
     border:1px solid var(--line);
     overflow:hidden;
   }
+  :root:not([data-theme="dark"]) .misc-dot{ background:#FFFFFF; }
   .misc-dot img{ width:22px; height:22px; object-fit:contain; }
-  .misc-name{
-    font-size:13.5px;
-    font-weight:600;
-    color:var(--ink);
-  }
-  .misc-sub{
-    font-size:11px;
-    color:var(--ink-soft);
-  }
+  .misc-name{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  :root:not([data-theme="dark"]) .misc-name{ color:#16233A; }
+  .misc-sub{ font-size:11px; color:var(--ink-soft); }
+  :root:not([data-theme="dark"]) .misc-sub{ color:#5C6B85; }
 
   @media (max-width:560px){
     .hero h1{ font-size:30px; }
-    .search-box{ flex-wrap:nowrap; padding-left:16px; }
+    .search-box{ padding-left:16px; }
     .search-box input{ font-size:14px; }
-    .search-box button{ padding:11px 16px; font-size:13px; }
+    .search-box button{ padding:11px 14px; font-size:13px; }
+    #aiSearchBtn{ padding:11px 12px; }
     .engine-grid{ grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); }
     .mode-switch{ flex-wrap:wrap; }
     .topbar{ padding:10px 14px; font-size:12px; }
@@ -824,13 +808,21 @@
   <div class="search-wrap">
     <div class="search-box">
       <span class="search-icon">
+        <!-- Голубая лупа -->
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="11" cy="11" r="7" stroke="#FFFFFF" stroke-width="2.4"/>
-          <path d="M20 20L16.65 16.65" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="11" cy="11" r="7" stroke="#1C6FD6" stroke-width="2.4"/>
+          <path d="M20 20L16.65 16.65" stroke="#1C6FD6" stroke-width="2.4" stroke-linecap="round"/>
         </svg>
       </span>
       <input type="text" id="queryInput" placeholder="Что будем искать?" autofocus>
       <button id="mainSearchBtn">Искать</button>
+      <button id="aiSearchBtn" title="Открыть Google AI-режим">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74L12 2z" fill="currentColor"/>
+          <path d="M19 15l.94 2.81L22 18l-2.06.94L19 22l-.94-3.06L16 18l2.06-.19L19 15z" fill="currentColor"/>
+        </svg>
+        AI
+      </button>
     </div>
   </div>
 
@@ -874,6 +866,10 @@
 <div class="topbar">
   <div class="brandmark" id="brandText" style="cursor:pointer;" title="Вернуться к обычному поиску">Open <b>Ru</b> Search</div>
   <nav>
+    <label class="ai-toggle-wrap" title="Включить/выключить кнопку AI">
+      <input type="checkbox" id="aiToggle" checked>
+      <span>AI</span>
+    </label>
     <a href="https://github.com/ARTEMPRO01MINETEXNICK" target="_blank" rel="noopener">Разработчик</a>
     <button class="bg-switch-btn" id="bgSwitchBtn" type="button" title="Сменить фон">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -936,6 +932,8 @@
 </div>
 
 <script>
+  const AI_URL = 'https://www.google.com/search?udm=50&q=';
+
   const engines = [
     { id:'google',      name:'Google',       region:'Мир',    domain:'google.com',        url:q => `https://www.google.com/search?q=${q}` },
     { id:'bing',        name:'Bing',         region:'Мир',    domain:'bing.com',           url:q => `https://www.bing.com/search?q=${q}` },
@@ -963,13 +961,30 @@
   let selected = 'google';
   let activeRegion = 'Все';
   let faviconTimer = null;
+  let aiEnabled = true;
 
   const grid = document.getElementById('engineGrid');
   const regionFilter = document.getElementById('regionFilter');
   const selCount = document.getElementById('selCount');
   const input = document.getElementById('queryInput');
+  const aiToggle = document.getElementById('aiToggle');
+  const aiSearchBtn = document.getElementById('aiSearchBtn');
 
   const regions = ['Все', ...Array.from(new Set(engines.map(e => e.region)))];
+
+  function applyAiState(){
+    if (aiEnabled){
+      aiSearchBtn.classList.remove('hidden');
+    } else {
+      aiSearchBtn.classList.add('hidden');
+    }
+  }
+
+  aiToggle.addEventListener('change', () => {
+    aiEnabled = aiToggle.checked;
+    try{ localStorage.setItem('ors_ai_enabled', aiEnabled ? '1' : '0'); }catch(e){}
+    applyAiState();
+  });
 
   function renderRegionFilter(){
     regionFilter.innerHTML = '';
@@ -1212,6 +1227,13 @@
     const engine = engines.find(e => e.id === selected);
     if (!engine) return;
     window.location.href = engine.url(encoded);
+  }
+
+  function openAI(){
+    const q = input.value.trim();
+    if (!q) { input.focus(); return; }
+    const encoded = encodeURIComponent(q);
+    window.location.href = AI_URL + encoded;
   }
 
   const wikiResults = document.getElementById('wikiResults');
@@ -1554,6 +1576,7 @@
   document.getElementById('mainSearchBtn').addEventListener('click', openSearch);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') openSearch(); });
   document.getElementById('goSelected').addEventListener('click', openSearch);
+  aiSearchBtn.addEventListener('click', openAI);
 
   const miscItems = [
     { name:'Вики Поиск',  sub:'результаты выше',   domain:'wikipedia.org',  action:'scroll' },
@@ -1637,8 +1660,19 @@
     const initialMode = savedMode === 'wiki' ? 'wiki' : 'normal';
     applyModeSilently(initialMode);
     history.replaceState({ orsMode: initialMode }, '', location.pathname + location.search);
+
+    const savedAi = localStorage.getItem('ors_ai_enabled');
+    if (savedAi === '0'){
+      aiEnabled = false;
+      aiToggle.checked = false;
+    } else {
+      aiEnabled = true;
+      aiToggle.checked = true;
+    }
+    applyAiState();
   }catch(e){
     applyModeSilently('normal');
+    applyAiState();
   }
   renderGrid();
 
