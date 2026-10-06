@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Baikal Pro Builder & Exporter</title>
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --panel-bg: #252526;
+            --accent: #007acc;
+            --text-main: #d4d4d4;
+            --success: #4caf50;
+            --error: #f44336;
+            --slide-w: 960px; /* Standard 16:9 width */
+            --slide-h: 540px; /* Standard 16:9 height */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Layout --- */
+        .sidebar-left {
+            width: 320px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .main-view {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a1a1a;
+            position: relative;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .sidebar-right {
+            width: 280px;
+            background-color: var(--panel-bg);
+            border-left: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        /* --- Controls --- */
+        h2 { margin-top: 0; font-size: 1.1rem; color: var(--accent); }
+        
+        textarea#commandInput {
+            width: 100%;
+            height: 120px;
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            padding: 10px;
+            resize: none;
+            border-radius: 4px;
+            font-family: monospace;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .btn-group { display: flex; gap: 5px; margin-bottom: 10px; }
+        
+        button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+
+        button:hover { opacity: 0.9; }
+        button.secondary { background-color: #444; }
+        button.success { background-color: var(--success); }
+        button.danger { background-color: var(--error); }
+
+        .log-area {
+            margin-top: 10px;
+            flex-grow: 1;
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-y: auto;
+            border-radius: 4px;
+            min-height: 150px;
+        }
+
+        .log-entry { margin-bottom: 4px; word-wrap: break-word; }
+        .log-success { color: var(--success); }
+        .log-error { color: var(--error); }
+        .log-info { color: #aaa; }
+
+        /* --- Slide Preview Container --- */
+        .slide-container {
+            width: var(--slide-w);
+            height: var(--slide-h);
+            background-color: white;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform-origin: top left;
+            /* Scale down for view if screen is small */
+            transform: scale(0.8); 
+        }
+
+        @media (max-width: 1200px) {
+            .slide-container { transform: scale(0.6); }
+        }
+
+        .slide-header {
+            padding: 30px 40px;
+            text-align: left; /* Changed to left for modern look */
+            color: #2c3e50;
+            font-size: 2.5em;
+            font-weight: 800;
+            border-bottom: 4px solid #007acc;
+            background: linear-gradient(to right, #ffffff 0%, #f0f8ff 100%);
+        }
+
+        .slide-body {
+            flex-grow: 1;
+            padding: 30px 40px;
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            align-content: start;
+            color: #333;
+        }
+
+        .element {
+            border: 1px solid #eee;
+            padding: 15px;
+            position: relative;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            word-break: break-word;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .element img, .element video {
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .element p {
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #444;
+        }
+
+        .element-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Right Sidebar List --- */
+        .slide-list-item {
+            background: #333;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .slide-list-item.active {
+            border-color: var(--accent);
+            background: #3a3a3a;
+        }
+        .slide-title-preview {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+        .slide-meta {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* --- Print Styles (For PDF Export) --- */
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .print-slide {
+                page-break-after: always;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                background: white;
+                color: black;
+            }
+            .print-header { font-size: 3em; padding: 20px; border-bottom: 5px solid #007acc; }
+            .print-body { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .print-element { border: 1px solid #ccc; padding: 10px; }
+            .print-element img { max-width: 100%; max-height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left Panel: AI Command Input -->
+    <div class="sidebar-left">
+        <h2>🤖 AI Decoder V3</h2>
+        <p style="font-size: 0.8rem; color: #888;">Формат: <code>Key: Value</code></p>
+        
+        <textarea id="commandInput" placeholder="Примеры:&#10;New Slide&#10;Title: Заголовок&#10;Text: Текст&#10;Image: URL"></textarea>
+        
+        <div class="btn-group">
+            <button onclick="executeCommand()">▶ Выполнить</button>
+            <button class="secondary" onclick="clearConsole()">🗑 Очистить лог</button>
+        </div>
+
+        <div class="btn-group">
+            <button class="success" onclick="loadBaikalPreset()">⚡ ЗАГРУЗИТЬ БАЙКАЛ</button>
+        </div>
+
+        <div class="btn-group">
+            <button class="danger" onclick="exportPDF()">📄 Скачать PDF / Печать</button>
+            <button class="secondary" onclick="exportJSON()">💾 Экспорт JSON</button>
+        </div>
+
+        <div class="log-area" id="consoleLog">
+            <div class="log-entry log-info">Система готова. Нажмите "ЗАГРУЗИТЬ БАЙКАЛ".</div>
+        </div>
+    </div>
+
+    <!-- Center Panel: Live Preview -->
+    <div class="main-view">
+        <div class="slide-container" id="currentSlidePreview">
+            <div class="slide-header" id="previewHeader">Заголовок</div>
+            <div class="slide-body" id="previewBody">
+                <!-- Elements injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Structure -->
+    <div class="sidebar-right">
+        <h2>📑 Слайды (<span id="slideCount">0</span>)</h2>
+        <div id="slideListContainer"></div>
+    </div>
+
+    <!-- Hidden Area for Printing -->
+    <div id="printArea" style="display:none;"></div>
+
+<script>
+    /**
+     * CORE DATA STRUCTURE
+     */
+    let presentationData = {
+        title: "Моя Презентация",
+        slides: []
+    };
+    let currentSlideIndex = 0;
+
+    // --- LOGGING SYSTEM ---
+    function log(message, type = 'info') {
+        const consoleEl = document.getElementById('consoleLog');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        consoleEl.prepend(entry);
+        // Keep log manageable
+        if(consoleEl.children.length > 50) consoleEl.lastChild.remove();
+    }
+
+    function clearConsole() {
+        document.getElementById('consoleLog').innerHTML = '<div class="log-entry log-info">Лог очищен.</div>';
+    }
+
+    // --- COMMAND ENGINE ---
+    function executeCommand() {
+        const input = document.getElementById('commandInput').value.trim();
+        if (!input) return;
+        
+        processSingleCommand(input);
+        renderUI();
+        document.getElementById('commandInput').value = '';
+    }
+
+    function processSingleCommand(cmdRaw) {
+        const cmd = cmdRaw.toLowerCase();
+        
+        // 1. Navigation & Creation
+        if (cmd.includes('new slide') || cmd.includes('создай слайд') || cmd === 'add') {
+            addNewSlide();
+            log("✅ Новый слайд создан.", "success");
+            return;
+        }
+
+        if (cmd.includes('delete') || cmd.includes('удали')) {
+            deleteCurrentSlide();
+            return;
+        }
+
+        if (cmd.includes('next') || cmd.includes('следующий')) {
+            if(currentSlideIndex < presentationData.slides.length - 1) currentSlideIndex++;
+            log(`➡ Переход на слайд ${currentSlideIndex + 1}`, "info");
+            return;
+        }
+
+        if (cmd.includes('prev') || cmd.includes('предыдущий')) {
+            if(currentSlideIndex > 0) currentSlideIndex--;
+            log(`⬅ Переход на слайд ${currentSlideIndex + 1}`, "info");
+            return;
+        }
+
+        // 2. Key-Value Parsing
+        const sepIndex = cmdRaw.indexOf(':');
+        if (sepIndex === -1) {
+            throw new Error("Формат ошибки. Используйте 'Ключ: Значение'. Пример: Title: Привет");
+        }
+
+        const key = cmdRaw.substring(0, sepIndex).trim().toLowerCase();
+        const value = cmdRaw.substring(sepIndex + 1).trim();
+
+        if (!presentationData.slides.length) addNewSlide(); // Auto-create if empty
+        
+        const slide = presentationData.slides[currentSlideIndex];
+
+        switch(key) {
+            case 'title':
+            case 'заголовок':
+            case 'name':
+                slide.title = value;
+                log(`📝 Заголовок изменен на: "${value}"`, "success");
+                break;
+
+            case 'text':
+            case 'текст':
+            case 'para':
+            case 'bullet':
+                slide.elements.push({ type: 'text', content: value });
+                log(`📄 Добавлен текст (${value.length} символов)`, "success");
+                break;
+
+            case 'image':
+            case 'img':
+            case 'фото':
+            case 'картинка':
+                slide.elements.push({ type: 'image', content: value });
+                log(`🖼 Добавлена картинка`, "success");
+                break;
+
+            case 'video':
+            case 'видео':
+                slide.elements.push({ type: 'video', content: value });
+                log(`🎥 Добавлено видео`, "success");
+                break;
+                
+            default:
+                throw new Error(`Неизвестный ключ: '${key}'. Доступны: Title, Text, Image, Video.`);
+        }
+    }
+
+    // --- ACTIONS ---
+    function addNewSlide() {
+        presentationData.slides.push({
+            title: "Новый слайд",
+            elements: []
+        });
+        currentSlideIndex = presentationData.slides.length - 1;
+    }
+
+    function deleteCurrentSlide() {
+        if (presentationData.slides.length <= 1) {
+            alert("Нельзя удалить единственный слайд!");
+            return;
+        }
+        presentationData.slides.splice(currentSlideIndex, 1);
+        if (currentSlideIndex >= presentationData.slides.length) {
+            currentSlideIndex = presentationData.slides.length - 1;
+        }
+        log("🗑 Слайд удален.", "warning");
+    }
+
+    // --- EXPORT FUNCTIONS ---
+    
+    function exportJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(presentationData, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "baikal_presentation.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        log("💾 Файл JSON скачан.", "success");
+    }
+
+    function exportPDF() {
+        log("🔄 Генерация области печати...", "info");
+        const printArea = document.getElementById('printArea');
+        printArea.innerHTML = '';
+
+        presentationData.slides.forEach((slide, index) => {
+            const slideDiv = document.createElement('div');
+            slideDiv.className = 'print-slide';
+            
+            // Header
+            const header = document.createElement('div');
+            header.className = 'print-header';
+            header.innerText = slide.title;
+            slideDiv.appendChild(header);
+
+            // Body Grid
+            const body = document.createElement('div');
+            body.className = 'print-body';
+            
+            slide.elements.forEach(el => {
+                const item = document.createElement('div');
+                item.className = 'print-element';
+                
+                if (el.type === 'text') {
+                    const p = document.createElement('p');
+                    p.innerText = el.content;
+                    item.appendChild(p);
+                } else if (el.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = el.content;
+                    // Force load before printing might be tricky in pure JS, 
+                    // but browsers usually handle cached images well.
+                    item.appendChild(img);
+                } else if (el.type === 'video') {
+                     const note = document.createElement('p');
+                     note.innerText = "[ВИДЕО: " + el.content + "]";
+                     note.style.color = "#666";
+                     item.appendChild(note);
+                }
+                body.appendChild(item);
+            });
+
+            slideDiv.appendChild(body);
+            printArea.appendChild(slideDiv);
+        });
+
+        // Trigger Browser Print Dialog
+        setTimeout(() => {
+            window.print();
+            log(" Окно печати открыто. Выберите 'Сохранить как PDF'.", "success");
+        }, 500);
+    }
+
+    // --- RENDERING UI ---
+    function renderUI() {
+        renderSlidesList();
+        renderCurrentSlide();
+        document.getElementById('slideCount').innerText = presentationData.slides.length;
+    }
+
+    function renderSlidesList() {
+        const container = document.getElementById('slideListContainer');
+        container.innerHTML = '';
+
+        presentationData.slides.forEach((slide, index) => {
+            const div = document.createElement('div');
+            div.className = `slide-list-item ${index === currentSlideIndex ? 'active' : ''}`;
+            div.onclick = () => {
+                currentSlideIndex = index;
+                renderUI();
+            };
+
+            const titleSpan = document.createElement('div');
+            titleSpan.className = 'slide-title-preview';
+            titleSpan.innerText = `${index + 1}. ${slide.title || 'Без названия'}`;
+
+            const metaSpan = document.createElement('div');
+            metaSpan.className = 'slide-meta';
+            const types = [...new Set(slide.elements.map(e => e.type))].join(', ');
+            metaSpan.innerText = `Элем.: ${slide.elements.length} | Типы: ${types || '-'}`;
+
+            div.appendChild(titleSpan);
+            div.appendChild(metaSpan);
+            container.appendChild(div);
+        });
+    }
+
+    function renderCurrentSlide() {
+        const previewHeader = document.getElementById('previewHeader');
+        const previewBody = document.getElementById('previewBody');
+        
+        const slide = presentationData.slides[currentSlideIndex];
+
+        if (!slide) {
+            previewHeader.innerText = "Нет данных";
+            previewBody.innerHTML = "";
+            return;
+        }
+
+        previewHeader.innerText = slide.title;
+        previewBody.innerHTML = '';
+
+        if (slide.elements.length === 0) {
+            previewBody.innerHTML = `<div style="grid-column: span 2; text-align:center; color:#ccc; margin-top:50px; font-style:italic;">Слайд пуст.<br>Добавьте контент через консоль.</div>`;
+            return;
+        }
+
+        slide.elements.forEach(el => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'element';
+            
+            const label = document.createElement('span');
+            label.className = 'element-label';
+            label.innerText = el.type.toUpperCase();
+            wrapper.appendChild(label);
+
+            if (el.type === 'text') {
+                const p = document.createElement('p');
+                p.innerText = el.content;
+                wrapper.appendChild(p);
+            } else if (el.type === 'image') {
+                const img = document.createElement('img');
+                img.src = el.content;
+                img.onerror = () => { 
+                    img.style.display='none'; 
+                    wrapper.insertAdjacentHTML('beforeend', '<small style="color:red;display:block;margin-top:5px;">❌ Не удалось загрузить изображение</small>'); 
+                };
+                wrapper.appendChild(img);
+            } else if (el.type === 'video') {
+                const vid = document.createElement('video');
+                vid.src = el.content;
+                vid.controls = true;
+                vid.style.width = '100%';
+                wrapper.appendChild(vid);
+            }
+
+            previewBody.appendChild(wrapper);
+        });
+    }
+
+    // --- THE BAIKAL PRESET (FULL VERSION) ---
+    function loadBaikalPreset() {
+        if(!confirm("Это перезапишет текущую работу. Продолжить?")) return;
+
+        presentationData.slides = [];
+        currentSlideIndex = 0;
+
+        const commands = [
+            // SLIDE 1: TITLE
+            "New Slide",
+            "Title: Озеро Байкал",
+            "Image: https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Baikal_Lake_5.jpg/1280px-Baikal_Lake_5.jpg",
+            "Text: Жемчужина Сибири. Самое глубокое и древнее озеро планеты.",
+            "Text: Объект Всемирного наследия ЮНЕСКО (1996 г.)",
+
+            // SLIDE 2: GEOGRAPHY
+            "New Slide",
+            "Title: Географические рекорды",
+            "Text: Глубина: 1642 метра (самая глубокая точка Земли среди озер)",
+            "Text: Площадь: 31 722 км²",
+            "Text: Длина: 636 км",
+            "Text: Возраст: ~25 миллионов лет",
+            "Image: https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Baikal_Map.png/800px-Baikal_Map.png",
+
+            // SLIDE 3: WATER RESOURCES
+            "New Slide",
+            "Title: Запасы пресной воды",
+            "Text: Объём воды: 23 615 км³",
+            "Text: Это около 20% всех мировых запасов жидкой пресной воды!",
+            "Text: Прозрачность воды достигает 40 метров.",
+            "Image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Ice_on_Baikal_Lake.jpg/800px-Ice_on_Baikal_Lake.jpg",
+
+            // SLIDE 4: FAUNA (NERPA)
+            "New Slide",
+            "Title: Байкальская нерпа",
+            "Text: Единственное в мире пресноводное ластоногое млекопитающее.",
+            "Text: Эндемик Байкала. Вид возник здесь миллионы лет назад.",
+            "Image: https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Pusa_sibirica_-_Baikal_seal_%28cropped%29.jpg/800px-Pusa_sibirica_-_Baikal_seal_%28cropped%29.jpg",
+
+            // SLIDE 5: FLORA & ENDEMICS
+            "New Slide",
+            "Title: Уникальная экосистема",
+            "Text: Более 2500 видов животных и растений.",
+            "Text: 80% видов — эндемики (больше нигде не встречаются).",
+            "Text: Голомянка — прозрачная рыбка без чешуи.",
+            "Image: https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Olkhon_Island_Burkhan_Rock.jpg/800px-Olkhon_Island_Burkhan_Rock.jpg",
+
+            // SLIDE 6: CLIMATE & WINDS
+            "New Slide",
+            "Title: Климат и ветры",
+            "Text: Резко континентальный климат.",
+            "Text: Знаменитые ветры: Сарма (до 100 км/ч), Баргузин, Култук.",
+            "Text: Зимой температура опускается до -40°C, летом до +30°C.",
+            "Image: https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Baikal_Sunset.jpg/800px-Baikal_Sunset.jpg",
+
+            // SLIDE 7: TOURISM
+            "New Slide",
+            "Title: Туризм и достопримечательности",
+            "Text: Остров Ольхон — духовный центр Байкала.",
+            "Text: Кругобайкальская железная дорога — памятник инженерии.",
+            "Text: Листвянка — главные ворота Байкала.",
+            "Text: Горячие источники Хакусы и Култуские.",
+            "Image: https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Spirulina_in_Baikal_Lake.jpg/800px-Spirulina_in_Baikal_Lake.jpg",
+
+            // SLIDE 8: ECOLOGY
+            "New Slide",
+            "Title: Экологические проблемы",
+            "Text: Угроза загрязнения от промышленных предприятий.",
+            "Text: Проблема массового цветения спирогиры.",
+            "Text: Необходимость строгого контроля туристической нагрузки.",
+            "Text: Закон об охране озера Байкал (1990 г.).",
+            "Image: https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Baikal_Lake_5.jpg/800px-Baikal_Lake_5.jpg",
+
+            // SLIDE 9: CONCLUSION
+            "New Slide",
+            "Title: Спасибо за внимание!",
+            "Text: Берегите природу Байкала для будущих поколений.",
+            "Text: Вопросы?",
+            "Image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Ice_on_Baikal_Lake.jpg/600px-Ice_on_Baikal_Lake.jpg"
+        ];
+
+        commands.forEach(cmd => {
+            try {
+                processSingleCommand(cmd);
+            } catch(e) {
+                log(`Ошибка в команде "${cmd}": ${e.message}`, 'error');
+            }
+        });
+
+        renderUI();
+        log("✅ Презентация 'Байкал' успешно загружена (9 слайдов).", "success");
+    }
+
+    // Init
+    window.onload = () => {
+        renderUI();
+    };
+
+</script>
+</body>
+</html>
