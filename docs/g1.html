@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Быстрый старт | ORS DOCS — Open RU Search</title>
+<meta name="description" content="https://github.com/openrusearch/openrusearch">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232563eb'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='14' font-weight='bold' fill='white' text-anchor='middle'%3EO%3C/text%3E%3C/svg%3E">
+<script>document.documentElement.classList.add("dark");</script>
+<style>
+:root{--vp-c-brand-1:#2563eb;--vp-c-brand-2:#3b82f6;--vp-c-brand-soft:rgba(59,130,246,.14);--vp-c-bg:#f4f6fa;--vp-c-bg-alt:#eef1f6;--vp-c-bg-elv:#ffffff;--vp-c-divider:#dfe3ea;--vp-c-text-1:#2b3446;--vp-c-text-2:#5b6779;--vp-c-text-3:#8a94a6;--vp-code-bg:#eef1f6;--vp-code-line:#dbe2ec;--vp-code-fg:#324a6e}
+html.dark{--vp-c-brand-1:#60a5fa;--vp-c-brand-2:#3b82f6;--vp-c-brand-soft:rgba(59,130,246,.2);--vp-c-bg:#171c26;--vp-c-bg-alt:#1e2430;--vp-c-bg-elv:#1e2430;--vp-c-divider:#2a3140;--vp-c-text-1:#e6eaf2;--vp-c-text-2:#aab4c5;--vp-c-text-3:#77829a;--vp-code-bg:#12161f;--vp-code-line:#232a38;--vp-code-fg:#c5d3ee}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--vp-c-bg);color:var(--vp-c-text-1);font-size:16px;line-height:24px;-webkit-font-smoothing:antialiased}
+a{color:var(--vp-c-brand-1);text-decoration:none}a:hover{text-decoration:underline}
+.nav{position:fixed;top:0;left:0;right:0;height:64px;background:var(--vp-c-bg-elv);border-bottom:1px solid var(--vp-c-divider);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100}
+.logo{font-weight:700;font-size:17px;letter-spacing:.05em;color:var(--vp-c-text-1);white-space:nowrap}
+.logo b{color:var(--vp-c-brand-1)}
+.nav .spacer{flex:1}.nav-links{display:flex;gap:4px;align-items:center}
+.nav-links a,.nav-links button{display:inline-flex;align-items:center;height:36px;padding:0 12px;border-radius:8px;color:var(--vp-c-text-2);font-size:14px;font-weight:500;border:1px solid transparent;background:none;cursor:pointer;font-family:inherit;text-decoration:none}
+.nav-links a:hover,.nav-links button:hover{color:var(--vp-c-brand-1);background:var(--vp-c-brand-soft);text-decoration:none}
+.layout{display:flex;max-width:1440px;margin:64px auto 0;padding:0 24px;gap:32px}
+aside.sidebar{width:272px;flex-shrink:0;position:sticky;top:88px;align-self:flex-start;max-height:calc(100vh - 104px);overflow-y:auto;padding:28px 8px 40px 0;font-size:14px}
+.side-group{margin-bottom:24px}.side-title{font-weight:600;color:var(--vp-c-text-1);margin:0 0 8px;padding:0 12px;font-size:14px}
+.side-link{display:block;padding:6px 12px 6px 20px;border-radius:6px;color:var(--vp-c-text-2);border-left:1px solid var(--vp-c-divider);margin-left:11px;line-height:20px}
+.side-link:hover{color:var(--vp-c-brand-1);background:var(--vp-c-brand-soft);text-decoration:none}
+.side-link.active{color:var(--vp-c-brand-1);border-left-color:var(--vp-c-brand-1);font-weight:600}
+.content{flex:1;min-width:0;max-width:760px;padding:28px 0 80px}
+.toc{width:220px;flex-shrink:0;position:sticky;top:88px;align-self:flex-start;padding:28px 0 40px 24px;font-size:13px}
+.toc-title{font-weight:600;color:var(--vp-c-text-1);margin-bottom:10px;font-size:13px}
+.toc a{display:block;padding:4px 0 4px 12px;color:var(--vp-c-text-2);border-left:1px solid var(--vp-c-divider);line-height:18px}
+.toc a:hover,.toc a.active{color:var(--vp-c-brand-1);text-decoration:none;border-left-color:var(--vp-c-brand-1)}
+h1{font-size:32px;line-height:40px;font-weight:700;letter-spacing:-.02em;margin:0 0 8px}
+.desc{color:var(--vp-c-text-2);font-size:17px;margin:0 0 28px}
+h2{font-size:24px;line-height:32px;font-weight:600;margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--vp-c-divider)}
+h3{font-size:19px;font-weight:600;margin:32px 0 12px}
+p{margin:16px 0}
+hr{border:none;border-top:1px solid var(--vp-c-divider);margin:24px 0}
+blockquote{margin:16px 0;padding:2px 16px;border-left:2px solid var(--vp-c-brand-2);color:var(--vp-c-text-2);background:var(--vp-c-bg-alt);border-radius:0 8px 8px 0}
+ul,ol{padding-left:24px;margin:16px 0}li{margin:6px 0}
+table{border-collapse:collapse;width:100%;margin:20px 0;font-size:14px}
+th,td{border:1px solid var(--vp-c-divider);padding:8px 12px;text-align:left}th{background:var(--vp-c-bg-alt);font-weight:600}
+.custom-block{border-radius:8px;padding:16px 20px;margin:22px 0;border:1px solid transparent}
+.custom-block .title{font-weight:600;margin:0 0 6px}
+.custom-block p{margin:6px 0}
+.custom-block.tip{background:var(--vp-c-brand-soft);border-color:var(--vp-c-brand-2)}.custom-block.tip .title{color:var(--vp-c-brand-1)}
+.custom-block.info{background:var(--vp-c-bg-alt);border-color:var(--vp-c-divider)}.custom-block.info .title{color:var(--vp-c-text-1)}
+.custom-block.warning{background:rgba(234,179,8,.12);border-color:rgba(234,179,8,.4)}.custom-block.warning .title{color:#b45309}
+html.dark .custom-block.warning{background:rgba(255,200,50,.08);border-color:rgba(255,200,50,.3)}.html.dark .custom-block.warning .title{color:#fbbf24}
+.vp-code-group{margin:22px 0;border-radius:8px;overflow:hidden;border:1px solid var(--vp-c-divider)}
+.vp-code-group .tabs{display:flex;background:var(--vp-c-bg-alt);border-bottom:1px solid var(--vp-c-divider);padding:0 12px}
+.vp-code-group .tabs input{display:none}
+.vp-code-group .tabs label{padding:8px 12px;font-size:13px;font-weight:500;color:var(--vp-c-brand-1);cursor:pointer}
+.code-block{position:relative;background:var(--vp-code-bg)}
+.code-block .actions{position:absolute;top:8px;right:8px}
+.copy{width:28px;height:28px;border-radius:6px;border:1px solid var(--vp-c-divider);background:var(--vp-c-bg-elv);cursor:pointer;opacity:.7}
+.copy:hover{opacity:1}
+.copy::after{content:"";display:block;width:12px;height:12px;margin:auto;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E") center/contain no-repeat;color:var(--vp-c-text-2)}
+pre{margin:0;padding:20px;overflow-x:auto;font-size:13.5px;line-height:22px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--vp-code-fg)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+:not(pre)>code{background:var(--vp-code-bg);color:var(--vp-c-brand-1);padding:2px 6px;border-radius:4px;font-size:.875em}
+pre .cm{color:var(--vp-c-text-3)}pre .kw{color:var(--vp-c-brand-1)}pre .st{color:#0e7490}pre .nu{color:#7c3aed}pre .fn{color:#2563eb}pre .pr{color:#64748b}
+html.dark pre .st{color:#7dd3fc}html.dark pre .nu{color:#c4b5fd}html.dark pre .fn{color:#93c5fd}html.dark pre .pr{color:#94a3b8}
+.pn{display:flex;justify-content:space-between;gap:16px;margin-top:56px;border-top:1px solid var(--vp-c-divider);padding-top:24px}
+.pn a{flex:1;border:1px solid var(--vp-c-divider);border-radius:8px;padding:12px 16px;max-width:48%;text-decoration:none}
+.pn a:hover{border-color:var(--vp-c-brand-2)}
+.pn small{display:block;color:var(--vp-c-text-3);font-size:12px;margin-bottom:2px}
+.pn span{color:var(--vp-c-brand-1);font-weight:500;font-size:14px}
+.pn .next{text-align:right;margin-left:auto}
+.menu-btn{display:none}
+@media(max-width:1100px){.toc{display:none}}
+@media(max-width:880px){aside.sidebar{display:none}.layout{padding:0 16px}}
+</style>
+</head>
+<body>
+  <div class="nav">
+    <div class="logo"><b>ORS</b> DOCS</div>
+    <div class="spacer"></div>
+    <nav class="nav-links">
+      <a href="https://github.com/openrusearch/openrusearch" target="_blank" rel="noopener">GitHub ↗</a>
+      <button id="themeToggle" title="Переключить тему">◐</button>
+    </nav>
+  </div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-group"><p class="side-title">Начало работы</p><a class="side-link" href="https://open-ru-search.github.io/docs">1. тест</a>
+              <a class="side-link" href="https://open-ru-search.github.io/docs">2. тест</a>
+              <a class="side-link" href="https://open-ru-search.github.io/docs">3. тест</a>
+              <a class="side-link" href="https://open-ru-search.github.io/docs/">4. тест</a></div>
+    </aside>
+    <main class="content">
+      <h1>Быстрый старт</h1>
+      <p class="desc">https://github.com/openrusearch/openrusearch</p>
+<h2 id="введение">Введение</h2>
+<p>Введение<br>Open Ru Search — это одностраничный веб-браузер-лаунчер для поиска в русском и мировом сегменте интернета, оформленный как самостоятельное приложение. Он не является поисковой системой и не хранит поисковые базы — это «надстройка» над выбранными поисковиками, которая помогает быстро отправить запрос в нужную систему.<br>Создан в 2026 году. Автор — ARTEMPRO01MINETEXNICK.</p>
+<div class="custom-block tip"><p class="title">https://openrusearch.github.io/openrusearch/</p></div>
+<p>Open Ru Search — это именно лаунчер, а не отдельная поисковая база. Браузер не может законно и технически получить полную выдачу чужого поисковика напрямую в свою страницу, поэтому вместо имитации результатов инструмент сразу отправляет запрос в настоящую поисковую систему. Единственное исключение — Википедия: у неё есть открытый API, поэтому её результаты показываются прямо на странице, в модальном окне.</p>
+
+
+    </main>
+    <aside class="toc">
+      <p class="toc-title">На этой странице</p>
+        <a href="#введение">Введение</a>
+    </aside>
+  </div>
+<script>
+(function(){
+  var root=document.documentElement;
+  var mode="dark";
+  var btn=document.getElementById("themeToggle");
+  function apply(dark){root.classList.toggle("dark",dark);}
+  if(mode==="light"||mode==="dark"){apply(mode==="dark");if(btn)btn.style.display="none";}
+  else{
+    var pref=localStorage.getItem("vitepress-theme-appearance")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+    apply(pref==="dark");
+    if(btn)btn.onclick=function(){var d=!root.classList.contains("dark");apply(d);localStorage.setItem("vitepress-theme-appearance",d?"dark":"light");};
+  }
+  document.querySelectorAll(".copy").forEach(function(b){
+    b.addEventListener("click",function(){
+      var pre=b.closest(".code-block").querySelector("pre");
+      navigator.clipboard.writeText(pre.innerText).then(function(){b.classList.add("done");setTimeout(function(){b.classList.remove("done");},1200);});
+    });
+  });
+  var links=[].slice.call(document.querySelectorAll(".toc a"));
+  var hs=links.map(function(a){return document.getElementById(a.getAttribute("href").slice(1));}).filter(Boolean);
+  function onScroll(){
+    var y=scrollY+120,cur=-1;
+    hs.forEach(function(h,i){if(h.offsetTop<=y)cur=i;});
+    links.forEach(function(a,i){a.classList.toggle("active",i===cur);});
+  }
+  addEventListener("scroll",onScroll,{passive:true});onScroll();
+})();
+</script>
+</body>
+</html>
