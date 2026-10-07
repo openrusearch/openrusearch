@@ -4,6 +4,7 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Open RU Search](https://img.shields.io/badge/Open_RU_Search-1E90FF?style=for-the-badge&logo=searchengin&logoColor=white)
 ![HTML](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
 
 <img width="1064" height="236" alt="2026-10-07_10-29-55" src="https://github.com/user-attachments/assets/af0c66ef-4f61-4c01-bdea-4203440f509b" />
 
