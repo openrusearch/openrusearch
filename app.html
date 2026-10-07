@@ -145,7 +145,8 @@ html.dark pre .st{color:#7dd3fc}html.dark pre .nu{color:#c4b5fd}html.dark pre .f
   function norm(s){return String(s||"").replace(/s+/g," ").trim().toLowerCase();}
   function parseList(text){
     var items=[];
-    text.split(/?
+    text.split(/
+?
 /).forEach(function(raw){
       var line=(raw||"").trim();
       if(!line||line.charAt(0)==="#")return;
