@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Open RU Search</title>
+<script src="engines.js"></script>
+<style>
+  :root {
+    --bg:#0E1013; --bar:#14171C; --surface:#1B1F26; --surface-2:#242A33; --line:#2A303A;
+    --text:#E8EBF0; --muted:#8A93A3; --accent:#5B8CFF; --accent-2:#7AD7FF; --danger:#FF6B57; --ok:#3DDC97;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; font-family:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); }
+  body { display:flex; flex-direction:column; height:100vh; }
+  button { font-family:inherit; }
+  svg.i { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* ==== СТРОКА ВКЛАДОК + КНОПКИ ОКНА ==== */
+  .titlebar {
+    display:flex;
+    align-items:center;
+    background:var(--bg);
+    height:44px;
+    padding:0 0 0 10px;
+    gap:2px;
+    user-select:none;
+    flex-shrink:0;
+    -webkit-app-region:drag;
+  }
+  .tabs-strip {
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+    flex:1;
+    min-width:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+    height:44px;
+    padding-top:8px;
+    -webkit-app-region:drag;
+  }
+  .tabs-strip::-webkit-scrollbar { display:none; }
+  .tabs-strip > *, .titlebar > * { -webkit-app-region:no-drag; }
+
+  .tab {
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    height:36px;
+    min-width:120px;
+    max-width:230px;
+    flex:0 1 220px;
+    padding:0 8px 0 12px;
+    color:var(--muted);
+    font-size:12.5px;
+    cursor:pointer;
+    border-radius:12px 12px 0 0;
+    transition:background .18s, color .18s;
+    flex-shrink:0;
+  }
+  .tab:hover { background:rgba(255,255,255,.05); color:var(--text); }
+  .tab.active { background:var(--bar); color:var(--text); }
+  .tab.active::before, .tab.active::after {
+    content:""; position:absolute; bottom:0; width:12px; height:12px; pointer-events:none;
+  }
+  .tab.active::before { left:-12px; background:radial-gradient(circle at 0 0, transparent 12px, var(--bar) 12.5px); }
+  .tab.active::after { right:-12px; background:radial-gradient(circle at 100% 0, transparent 12px, var(--bar) 12.5px); }
+
+  .tab-favicon {
+    position:relative;
+    width:16px; height:16px;
+    border-radius:5px;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    background:var(--surface-2);
+    color:var(--text);
+    font-size:9.5px;
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .tab-favicon img { width:16px; height:16px; object-fit:contain; display:block; }
+  .tab.loading .tab-favicon img { opacity:0; }
+  .tab.loading .tab-favicon::after {
+    content:"";
+    position:absolute; inset:2px;
+    border-radius:50%;
+    border:2px solid var(--line);
+    border-top-color:var(--accent);
+    animation:spin .7s linear infinite;
+    background:var(--bar);
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .tab-title { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500; }
+  .tab-close {
+    width:20px; height:20px;
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; line-height:1;
+    opacity:0;
+    transition:opacity .15s, background .15s;
+    flex-shrink:0;
+  }
+  .tab:hover .tab-close, .tab.active .tab-close { opacity:.7; }
+  .tab-close:hover { opacity:1 !important; background:rgba(255,255,255,.12); }
+  .tab-new {
+    width:30px; height:30px;
+    margin:0 0 3px 8px;
+    border-radius:50%;
+    background:transparent;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s, color .15s, transform .25s var(--ease);
+    flex-shrink:0;
+  }
+  .tab-new:hover { background:var(--surface-2); color:var(--text); transform:rotate(90deg); }
+
+  /* ==== КНОПКИ ОКНА (─ ☐ ✕) ==== */
+  .window-controls {
+    display:flex;
+    align-items:stretch;
+    height:44px;
+    flex-shrink:0;
+    -webkit-app-region:no-drag;
+  }
+  .win-btn {
+    width:46px;
+    height:44px;
+    background:transparent;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s, color .15s;
+  }
+  .win-btn:hover { background:rgba(255,255,255,.08); color:var(--text); }
+  .win-btn.win-close:hover { background:#E81123; color:#fff; }
+  .win-btn svg { width:11px; height:11px; stroke-width:1.4; }
+
+  /* ==== АДРЕСНАЯ СТРОКА ==== */
+  .navbar {
+    display:flex; align-items:center; gap:4px;
+    background:var(--bar);
+    padding:7px 12px;
+    height:50px;
+    flex-shrink:0;
+    position:relative;
+    z-index:20;
+  }
+  .nav-btn, .dl-btn {
+    width:34px; height:34px;
+    border-radius:50%;
+    background:transparent;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s, color .15s, transform .15s;
+    position:relative;
+    flex-shrink:0;
+  }
+  .nav-btn:hover, .dl-btn:hover { background:var(--surface-2); color:var(--text); }
+  .nav-btn:active, .dl-btn:active { transform:scale(.9); }
+  .nav-btn:disabled { opacity:.3; cursor:default; pointer-events:none; }
+  .omnibox {
+    flex:1; display:flex; align-items:center; gap:10px;
+    min-width:0; height:36px;
+    margin:0 8px; padding:0 16px;
+    background:var(--surface);
+    border:1px solid transparent;
+    border-radius:18px;
+    color:var(--muted);
+    transition:background .2s, border-color .2s, box-shadow .2s;
+  }
+  .omnibox:hover { background:var(--surface-2); }
+  .omnibox:focus-within {
+    background:var(--bg);
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px rgba(91,140,255,.18);
+    color:var(--accent);
+  }
+  .url-input {
+    flex:1; background:transparent; border:none; outline:none;
+    color:var(--text);
+    font-family:inherit;
+    font-size:13.5px;
+    min-width:0;
+  }
+  .url-input::placeholder { color:var(--muted); }
+  .progress {
+    position:absolute; left:0; right:0; bottom:-1px;
+    height:2px; overflow:hidden;
+    opacity:0;
+    transition:opacity .25s;
+    pointer-events:none;
+  }
+  .progress.on { opacity:1; }
+  .progress::after {
+    content:""; position:absolute; top:0; bottom:0; width:35%;
+    background:linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+    animation:slide 1.1s ease-in-out infinite;
+  }
+  @keyframes slide { from { left:-35%; } to { left:100%; } }
+
+  /* ==== ОБЛАСТЬ WEBVIEW ==== */
+  .viewport {
+    flex:1; position:relative;
+    background:var(--bar);
+    overflow:hidden;
+    border-top:1px solid var(--line);
+  }
+  webview {
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    border:none;
+    display:none;
+    background:#fff;
+  }
+  webview.active { display:flex; }
+
+  /* ==== ЗАГРУЗКИ ==== */
+  .dl-wrap { position:relative; display:inline-flex; }
+  .dl-btn.has-active { color:var(--accent); }
+  .dl-badge {
+    position:absolute; top:1px; right:1px;
+    background:var(--accent); color:#fff;
+    font-size:9.5px; font-weight:700;
+    min-width:15px; height:15px;
+    border-radius:8px;
+    display:none; align-items:center; justify-content:center;
+    padding:0 4px;
+  }
+  .dl-badge.show { display:flex; }
+  .dl-pop {
+    display:none;
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    width:380px;
+    max-height:500px;
+    background:rgba(27,31,38,.92);
+    backdrop-filter:blur(18px);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:0 24px 60px rgba(0,0,0,.55);
+    z-index:200;
+    overflow:hidden;
+    flex-direction:column;
+    transform-origin:top right;
+  }
+  .dl-pop.show { display:flex; animation:pop .2s var(--ease); }
+  @keyframes pop { from { opacity:0; transform:translateY(-6px) scale(.97); } }
+  .dl-pop-head {
+    padding:14px 16px;
+    font-size:13.5px; font-weight:600;
+    border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .dl-pop-clear {
+    background:transparent; border:none;
+    color:var(--accent);
+    font-size:12px; font-weight:600;
+    cursor:pointer;
+    padding:5px 10px;
+    border-radius:8px;
+  }
+  .dl-pop-clear:hover { background:rgba(91,140,255,.15); }
+  .dl-list {
+    overflow-y:auto; flex:1;
+    max-height:440px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--line) transparent;
+  }
+  .dl-empty { padding:36px 20px; text-align:center; color:var(--muted); font-size:13px; }
+  .dl-item { padding:13px 16px; border-bottom:1px solid var(--line); font-size:12.5px; }
+  .dl-item:last-child { border-bottom:none; }
+  .dl-name { font-weight:600; margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .dl-bar { height:4px; background:var(--bg); border-radius:2px; overflow:hidden; margin-bottom:6px; }
+  .dl-bar-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius:2px; transition:width .2s; }
+  .dl-meta { display:flex; justify-content:space-between; font-size:11.5px; color:var(--muted); }
+  .dl-actions { display:flex; gap:6px; margin-top:9px; }
+  .dl-actions button {
+    background:var(--surface-2); border:none; color:var(--text);
+    font-size:11.5px; font-weight:600;
+    padding:6px 12px; border-radius:8px; cursor:pointer;
+    transition:background .15s;
+  }
+  .dl-actions button:hover { background:#2F3743; }
+  .dl-actions .dl-cancel { color:var(--danger); }
+  .dl-status-done { color:var(--ok); }
+  .dl-status-error { color:var(--danger); }
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+  /* ==== РАСШИРЕНИЯ ==== */
+  .ext-pop { width:420px; }
+  .ext-add { display:flex; gap:8px; padding:12px 16px; border-bottom:1px solid var(--line); }
+  .ext-add button { flex:1; display:flex; align-items:center; justify-content:center; gap:7px; background:var(--surface-2); border:1px solid var(--line); color:var(--text); font-size:12px; font-weight:600; padding:9px 8px; border-radius:10px; cursor:pointer; transition:background .15s, border-color .15s; }
+  .ext-add button:hover { background:#2F3743; border-color:var(--accent); }
+  .ext-add svg.i { width:15px; height:15px; }
+  .ext-status { display:none; padding:9px 16px; font-size:12px; border-bottom:1px solid var(--line); color:var(--ok); }
+  .ext-status.show { display:block; } .ext-status.bad { color:var(--danger); }
+  .ext-top { display:flex; align-items:flex-start; gap:12px; }
+  .ext-meta { flex:1; min-width:0; }
+  .ext-ver { color:var(--muted); font-weight:400; font-size:11px; margin-left:4px; }
+  .ext-desc { color:var(--muted); font-size:11.5px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .ext-warn { margin-top:8px; font-size:11.5px; color:#FFB454; line-height:1.4; }
+  .sw { position:relative; width:36px; height:20px; flex-shrink:0; cursor:pointer; margin-top:2px; }
+  .sw input { position:absolute; opacity:0; inset:0; cursor:pointer; }
+  .sw span { position:absolute; inset:0; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; transition:background .2s; }
+  .sw span::after { content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--muted); transition:transform .2s var(--ease), background .2s; }
+  .sw input:checked + span { background:var(--accent); border-color:var(--accent); }
+  .sw input:checked + span::after { transform:translateX(16px); background:#fff; }
+  .sw input:focus-visible + span { outline:2px solid var(--accent); outline-offset:2px; }
+  .dl-btn.ext-on { color:var(--accent); }
+
+  /* ==== ВЫБОР ПОИСКОВИКА / ИИ ПОД АДРЕСНОЙ СТРОКОЙ ==== */
+  .omni-wrap { flex:1; min-width:0; position:relative; display:flex; margin:0 8px; }
+  .omni-wrap .omnibox { margin:0; }
+  .omni-pop {
+    display:none; position:absolute; top:calc(100% + 8px); left:0; right:0;
+    max-height:min(70vh, 540px); overflow-y:auto;
+    background:rgba(27,31,38,.97); backdrop-filter:blur(18px);
+    border:1px solid var(--line); border-radius:16px;
+    box-shadow:0 24px 60px rgba(0,0,0,.55);
+    z-index:250; padding:12px 14px 4px;
+    scrollbar-width:thin; scrollbar-color:var(--line) transparent;
+  }
+  .omni-pop.show { display:block; animation:pop .2s var(--ease); }
+  .omni-title {
+    font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--muted);
+    padding:4px 4px 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .omni-grid { display:flex; flex-wrap:wrap; gap:6px; padding-bottom:10px; }
+  .omni-chip {
+    display:inline-flex; align-items:center; gap:7px;
+    padding:6px 12px 6px 7px; border-radius:999px;
+    background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    font-size:12.5px; line-height:1; cursor:pointer; user-select:none;
+    transition:background .15s, border-color .15s, color .15s, transform .15s;
+  }
+  .omni-chip:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .omni-chip:active { transform:scale(.97); }
+  .omni-chip.active { background:rgba(91,140,255,.16); border-color:var(--accent); color:var(--accent-2); font-weight:600; }
+  .omni-ico {
+    width:20px; height:20px; border-radius:6px; flex-shrink:0; overflow:hidden;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--bg); color:var(--accent-2); font-size:10.5px; font-weight:700;
+  }
+  .omni-ico img { width:16px; height:16px; object-fit:contain; display:block; }
+  .omni-hint { font-size:11.5px; color:var(--muted); padding:0 4px 10px; line-height:1.4; }
+
+  /* ==== POPUP РАСШИРЕНИЯ ПОВЕРХ СТРАНИЦЫ ==== */
+  .ext-backdrop { display:none; position:fixed; left:0; right:0; bottom:0; top:44px; z-index:390; background:transparent; }
+  .ext-backdrop.show { display:block; }
+  .ext-popup-frame {
+    display:none; position:fixed; z-index:400;
+    background:#fff; border-radius:12px; overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.55), 0 0 0 1px var(--line);
+  }
+  .ext-popup-frame.show { display:block; animation:pop .18s var(--ease); }
+  .ext-popup-frame webview { display:flex; position:absolute; inset:0; width:100%; height:100%; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-fwd" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-reload" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6M13 4l-2 16"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M10 4a2 2 0 1 1 4 0v1h4a1 1 0 0 1 1 1v4h-1a2 2 0 1 0 0 4h1v4a1 1 0 0 1-1 1h-4v-1a2 2 0 1 0-4 0v1H6a1 1 0 0 1-1-1v-4h1a2 2 0 1 0 0-4H5V6a1 1 0 0 1 1-1h4z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5"/></symbol>
+  <symbol id="i-min" viewBox="0 0 12 12"><path d="M2 6h8"/></symbol>
+  <symbol id="i-max" viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 12 12"><rect x="2.5" y="3.5" width="6" height="6"/><path d="M4.5 3.5V2.5h5v5h-1"/></symbol>
+  <symbol id="i-x" viewBox="0 0 12 12"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></symbol>
+</svg>
+
+  <!-- СТРОКА ВКЛАДОК + КНОПКИ ОКНА -->
+  <div class="titlebar" id="titlebar">
+    <button class="tab-new" id="newTabBtn" title="Новая вкладка (Ctrl+T)"><svg class="i"><use href="#i-plus"/></svg></button>
+    <div class="tabs-strip" id="tabsStrip"></div>
+    <div class="window-controls">
+      <button class="win-btn" id="winMin" title="Свернуть"><svg class="i"><use href="#i-min"/></svg></button>
+      <button class="win-btn" id="winMax" title="Развернуть"><svg class="i"><use href="#i-max"/></svg></button>
+      <button class="win-btn win-close" id="winClose" title="Закрыть"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+  </div>
+
+  <div class="navbar">
+    <button class="nav-btn" id="backBtn" title="Назад"><svg class="i"><use href="#i-back"/></svg></button>
+    <button class="nav-btn" id="fwdBtn" title="Вперёд"><svg class="i"><use href="#i-fwd"/></svg></button>
+    <button class="nav-btn" id="reloadBtn" title="Обновить (Ctrl+R)"><svg class="i"><use href="#i-reload"/></svg></button>
+    <button class="nav-btn" id="homeBtn" title="Домой"><svg class="i"><use href="#i-home"/></svg></button>
+
+    <div class="omni-wrap">
+      <label class="omnibox">
+        <svg class="i" id="urlIcon" style="width:16px;height:16px"><use href="#i-search"/></svg>
+        <input type="text" class="url-input" id="urlInput" placeholder="Введите адрес или поисковый запрос" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="omni-pop" id="omniPop">
+        <div class="omni-title" id="omniTitle">Искать в:</div>
+        <div class="omni-grid" id="omniEngines"></div>
+        <div class="omni-title">Искать в ИИ:</div>
+        <div class="omni-grid" id="omniAi"></div>
+        <div class="omni-hint" id="omniHint"></div>
+      </div>
+    </div>
+
+    <button class="nav-btn" id="devtoolsBtn" title="DevTools (F12)"><svg class="i"><use href="#i-code"/></svg></button>
+
+    <div class="dl-wrap">
+      <button class="dl-btn" id="extBtn" title="Расширения"><svg class="i"><use href="#i-puzzle"/></svg></button>
+      <div class="dl-pop ext-pop" id="extPop">
+        <div class="dl-pop-head"><span>Расширения</span></div>
+        <div class="ext-add">
+          <button id="extAddDir" title="Папка с manifest.json"><svg class="i"><use href="#i-folder"/></svg>Распакованное</button>
+          <button id="extAddFile" title="Файл .crx или .zip"><svg class="i"><use href="#i-file"/></svg>Файл .crx / .zip</button>
+        </div>
+        <div class="ext-status" id="extStatus"></div>
+        <div class="dl-list" id="extList"></div>
+      </div>
+    </div>
+
+    <div class="dl-wrap">
+      <button class="dl-btn" id="dlBtn" title="Загрузки">
+        <svg class="i"><use href="#i-dl"/></svg>
+        <span class="dl-badge" id="dlBadge">0</span>
+      </button>
+      <div class="dl-pop" id="dlPop">
+        <div class="dl-pop-head">
+          <span>Загрузки</span>
+          <button class="dl-pop-clear" id="dlClear">Очистить</button>
+        </div>
+        <div class="dl-list" id="dlList">
+          <div class="dl-empty">Пока ничего не скачано</div>
+        </div>
+      </div>
+    </div>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div class="viewport" id="viewport"></div>
+
+  <!-- popup расширения поверх страницы -->
+  <div class="ext-backdrop" id="extBackdrop"></div>
+  <div class="ext-popup-frame" id="extPopupFrame"></div>
+
+<script>
+  const HOME_PAGE = 'start.html';
+  const MAX_TITLE_LENGTH = 22;
+
+  let tabs = [];
+  let activeId = null;
+  let tabCounter = 0;
+
+  const tabsStrip = document.getElementById('tabsStrip');
+  const viewport = document.getElementById('viewport');
+  const urlInput = document.getElementById('urlInput');
+  const urlIcon = document.getElementById('urlIcon');
+  const progress = document.getElementById('progress');
+  const backBtn = document.getElementById('backBtn');
+  const fwdBtn = document.getElementById('fwdBtn');
+  const reloadBtn = document.getElementById('reloadBtn');
+  const homeBtn = document.getElementById('homeBtn');
+  const newTabBtn = document.getElementById('newTabBtn');
+
+  // Если открыта страница Nonet.html, в адресной строке показываем исходный адрес, а не служебный
+  function shownUrl(u) {
+    try {
+      const x = new URL(u, location.href);
+      if (x.protocol === 'file:' && /\/Nonet\.html$/i.test(x.pathname)) {
+        const t = x.searchParams.get('u');
+        if (t) return t;
+      }
+    } catch (e) {}
+    return u;
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ==== КНОПКИ ОКНА ====
+  document.getElementById('winMin').addEventListener('click', () => window.openru.windowMinimize());
+  document.getElementById('winMax').addEventListener('click', () => window.openru.windowMaximize());
+  document.getElementById('winClose').addEventListener('click', () => window.openru.windowClose());
+
+  const maxIconUse = document.querySelector('#winMax use');
+  function updateMaxIcon(isMax) {
+    maxIconUse.setAttribute('href', isMax ? '#i-restore' : '#i-max');
+    document.getElementById('winMax').title = isMax ? 'Восстановить' : 'Развернуть';
+  }
+  if (window.openru.onWindowMaximized) {
+    window.openru.onWindowMaximized((isMax) => updateMaxIcon(isMax));
+  }
+  window.openru.windowIsMaximized().then(updateMaxIcon);
+
+  // ==== ИКОНКА В АДРЕСНОЙ СТРОКЕ ====
+  function updateOmnibox(tab) {
+    const secure = /^https:/i.test(tab.url || '');
+    urlIcon.querySelector('use').setAttribute('href', secure ? '#i-lock' : '#i-search');
+    progress.classList.toggle('on', !!tab.loading);
+  }
+
+  // ==== ФАВИКОНКА ====
+  function faviconUrl(pageUrl) {
+    try { const u = new URL(pageUrl); return `${u.protocol}//${u.host}/favicon.ico`; }
+    catch (e) { return null; }
+  }
+  function setTabFavicon(tab, pageUrl) {
+    const iconEl = tab.el.querySelector('.tab-favicon');
+    if (!iconEl) return;
+    const fav = faviconUrl(pageUrl);
+    if (!fav) { iconEl.textContent = '•'; return; }
+    iconEl.textContent = '';
+    const img = new Image();
+    img.src = fav;
+    img.onload = () => {
+      if (img.naturalWidth > 1 && img.naturalHeight > 1) {
+        iconEl.textContent = '';
+        iconEl.appendChild(img);
+      } else {
+        iconEl.textContent = (new URL(pageUrl).hostname[0] || '•').toUpperCase();
+      }
+    };
+    img.onerror = () => {
+      try { iconEl.textContent = (new URL(pageUrl).hostname[0] || '•').toUpperCase(); }
+      catch (e) { iconEl.textContent = '•'; }
+    };
+  }
+
+  // ==== СОЗДАНИЕ ВКЛАДКИ ====
+  function createTab(url) {
+    const id = ++tabCounter;
+    const wv = document.createElement('webview');
+    wv.src = url || HOME_PAGE;
+    wv.setAttribute('allowpopups', '');
+
+    const tabEl = document.createElement('div');
+    tabEl.className = 'tab';
+    tabEl.dataset.id = id;
+    tabEl.innerHTML = `
+      <span class="tab-favicon">•</span>
+      <span class="tab-title">Загрузка…</span>
+      <span class="tab-close" title="Закрыть (Ctrl+W)">×</span>
+    `;
+
+    tabEl.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tab-close')) return;
+      setActiveTab(id);
+    });
+    tabEl.addEventListener('auxclick', (e) => {
+      if (e.button === 1) { e.preventDefault(); closeTab(id); }
+    });
+    tabEl.querySelector('.tab-close').addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeTab(id);
+    });
+
+    tabsStrip.appendChild(tabEl);
+    viewport.appendChild(wv);
+
+    const tab = { id, webview: wv, title: 'Новая вкладка', url: url || HOME_PAGE, el: tabEl, loading: false };
+    tabs.push(tab);
+
+    wv.addEventListener('did-start-loading', () => {
+      tab.loading = true;
+      tab.el.classList.add('loading');
+      tab.el.querySelector('.tab-title').textContent = 'Загрузка…';
+      if (id === activeId) updateOmnibox(tab);
+    });
+
+    wv.addEventListener('did-stop-loading', () => {
+      tab.loading = false;
+      tab.el.classList.remove('loading');
+      try {
+        tab.url = wv.getURL();
+        tab.title = wv.getTitle() || 'Без названия';
+      } catch (e) { tab.title = 'Без названия'; }
+      updateTabTitle(tab);
+      setTabFavicon(tab, tab.url);
+      if (id === activeId) {
+        urlInput.value = shownUrl(tab.url);
+        updateNavButtons(wv);
+        updateOmnibox(tab);
+      }
+    });
+
+    wv.addEventListener('did-navigate', (e) => {
+      tab.url = e.url;
+      setTabFavicon(tab, e.url);
+      if (id === activeId) {
+        urlInput.value = shownUrl(e.url);
+        updateNavButtons(wv);
+        updateOmnibox(tab);
+      }
+    });
+
+    wv.addEventListener('did-navigate-in-page', (e) => {
+      tab.url = e.url;
+      if (id === activeId) {
+        urlInput.value = shownUrl(e.url);
+        updateNavButtons(wv);
+      }
+    });
+
+    wv.addEventListener('page-title-updated', (e) => {
+      tab.title = e.title;
+      updateTabTitle(tab);
+    });
+
+    wv.addEventListener('new-window', (e) => {
+      e.preventDefault();
+      createTab(e.url);
+    });
+
+    wv.addEventListener('did-fail-load', async (e) => {
+      if (e.errorCode === -3) return;                       // отмена навигации — не ошибка
+      console.warn('Ошибка загрузки:', e.errorDescription, e.validatedURL);
+      if (!e.isMainFrame || !NET_ERRORS.has(e.errorCode)) return;
+      if (/Nonet\.html/i.test(e.validatedURL || '')) return;
+      // -106 = интернет отключён точно; остальные сетевые ошибки уточняем пробой соединения
+      if (e.errorCode !== -106 && !(await isOffline())) return;
+      wv.loadURL(nonetUrl(e.validatedURL));
+    });
+
+    setTabFavicon(tab, tab.url);
+    setActiveTab(id);
+    return tab;
+  }
+
+  function updateTabTitle(tab) {
+    const short = tab.title.length > MAX_TITLE_LENGTH
+      ? tab.title.slice(0, MAX_TITLE_LENGTH) + '…'
+      : tab.title;
+    tab.el.querySelector('.tab-title').textContent = short;
+    tab.el.title = tab.title;
+  }
+
+  function setActiveTab(id) {
+    activeId = id;
+    closeExtPopup();
+    tabs.forEach(t => {
+      const isActive = t.id === id;
+      t.el.classList.toggle('active', isActive);
+      t.webview.classList.toggle('active', isActive);
+    });
+    const tab = tabs.find(t => t.id === id);
+    if (tab) {
+      urlInput.value = shownUrl(tab.url);
+      updateNavButtons(tab.webview);
+      updateOmnibox(tab);
+      tab.el.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    }
+    urlInput.focus();
+    urlInput.select();
+  }
+
+  function closeTab(id) {
+    const idx = tabs.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    const tab = tabs[idx];
+    tab.el.remove();
+    tab.webview.remove();
+    tabs.splice(idx, 1);
+
+    if (tabs.length === 0) { createTab(); return; }
+    if (activeId === id) {
+      const next = tabs[Math.min(idx, tabs.length - 1)];
+      setActiveTab(next.id);
+    }
+  }
+
+  function updateNavButtons(wv) {
+    try {
+      backBtn.disabled = !wv.canGoBack();
+      fwdBtn.disabled = !wv.canGoForward();
+    } catch (e) {
+      backBtn.disabled = true;
+      fwdBtn.disabled = true;
+    }
+  }
+
+  // ==== НЕТ ИНТЕРНЕТА ====
+  const NONET_PAGE = 'Nonet.html';
+  // -7 таймаут, -100/-101/-102 обрыв/сброс/отказ, -105 DNS, -106 нет интернета,
+  // -109 адрес недоступен, -118 таймаут соединения, -130 ошибка прокси
+  const NET_ERRORS = new Set([-7, -100, -101, -102, -105, -106, -109, -118, -130]);
+  const PROBES = [
+    'https://www.gstatic.com/generate_204',
+    'https://yandex.ru/favicon.ico',
+    'https://www.cloudflare.com/cdn-cgi/trace'
+  ];
+  function nonetUrl(failedUrl) {
+    const base = new URL(NONET_PAGE, location.href).href;
+    return failedUrl ? base + '?u=' + encodeURIComponent(failedUrl) : base;
+  }
+  function probe(url) {
+    return new Promise((resolve) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4000);
+      fetch(url, { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal })
+        .then(() => { clearTimeout(t); resolve(true); })
+        .catch(() => { clearTimeout(t); resolve(false); });
+    });
+  }
+  async function isOffline() {
+    if (navigator.onLine === false) return true;
+    const r = await Promise.all(PROBES.map(probe));
+    return !r.some(Boolean);
+  }
+
+  // ==== ПОИСКОВИК ПО УМОЛЧАНИЮ ДЛЯ АДРЕСНОЙ СТРОКИ ====
+  function currentEngine() {
+    let id = null;
+    try { id = localStorage.getItem('ors_selected_engine'); } catch (e) {}
+    return ORS_ENGINES.find(x => x.id === id) || ORS_ENGINES[0];
+  }
+
+  function resolveInput(input) {
+    const t = input.trim();
+    if (!t) return HOME_PAGE;
+    if (/^(https?|file|chrome-extension):\/\//i.test(t)) return t;
+    if (/^[a-zа-я0-9-]+(\.[a-zа-я0-9-]+)+(\/.*)?$/i.test(t) && !/\s/.test(t)) {
+      return 'https://' + t;
+    }
+    return currentEngine().url(encodeURIComponent(t));
+  }
+
+  backBtn.addEventListener('click', () => {
+    const t = tabs.find(x => x.id === activeId);
+    if (t && t.webview.canGoBack()) t.webview.goBack();
+  });
+  fwdBtn.addEventListener('click', () => {
+    const t = tabs.find(x => x.id === activeId);
+    if (t && t.webview.canGoForward()) t.webview.goForward();
+  });
+  reloadBtn.addEventListener('click', () => {
+    const t = tabs.find(x => x.id === activeId);
+    if (t) t.webview.reload();
+  });
+  homeBtn.addEventListener('click', () => {
+    const t = tabs.find(x => x.id === activeId);
+    if (t) t.webview.loadURL(HOME_PAGE);
+  });
+  newTabBtn.addEventListener('click', () => createTab());
+
+  urlInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const t = tabs.find(x => x.id === activeId);
+      if (!t) return;
+      t.webview.loadURL(resolveInput(urlInput.value));
+      urlInput.blur();
+    }
+  });
+  urlInput.addEventListener('focus', () => urlInput.select());
+
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 't') { e.preventDefault(); createTab(); }
+    if (e.ctrlKey && e.key === 'w') { e.preventDefault(); if (activeId) closeTab(activeId); }
+    if (e.ctrlKey && e.key === 'l') { e.preventDefault(); urlInput.focus(); urlInput.select(); openOmniPop(); }
+    if (e.ctrlKey && e.key === 'r') {
+      e.preventDefault();
+      const t = tabs.find(x => x.id === activeId);
+      if (t) t.webview.reload();
+    }
+  });
+
+  // ==== DEVTOOLS ====
+  const devtoolsBtn = document.getElementById('devtoolsBtn');
+  let devtoolsOpen = false;
+  let devtoolsTabId = null;
+
+  async function openDevTools() {
+    const tab = tabs.find(x => x.id === activeId);
+    if (!tab) return;
+    try {
+      const wcId = tab.webview.getWebContentsId();
+      await window.openru.openDevTools(wcId);
+      devtoolsOpen = true;
+      devtoolsTabId = tab.id;
+    } catch (err) { console.error('Ошибка DevTools:', err); }
+  }
+  function closeDevTools() {
+    const tab = tabs.find(x => x.id === devtoolsTabId);
+    if (tab) {
+      try {
+        const wcId = tab.webview.getWebContentsId();
+        window.openru.closeDevTools(wcId);
+      } catch (e) {}
+    }
+    devtoolsOpen = false;
+    devtoolsTabId = null;
+  }
+  devtoolsBtn.addEventListener('click', () => {
+    if (devtoolsOpen) closeDevTools(); else openDevTools();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+      e.preventDefault();
+      if (devtoolsOpen) closeDevTools(); else openDevTools();
+    }
+    if (e.key === 'F12') {
+      e.preventDefault();
+      if (devtoolsOpen) closeDevTools(); else openDevTools();
+    }
+  });
+
+  // ==== ЗАГРУЗКИ ====
+  const dlBtn = document.getElementById('dlBtn');
+  const dlPop = document.getElementById('dlPop');
+  const dlList = document.getElementById('dlList');
+  const dlBadge = document.getElementById('dlBadge');
+  const dlClear = document.getElementById('dlClear');
+  const downloadItems = new Map();
+
+  dlBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dlPop.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if (!dlPop.contains(e.target) && !dlBtn.contains(e.target)) dlPop.classList.remove('show');
+  });
+
+  function fmtBytes(b) {
+    if (!b || b < 1024) return (b || 0) + ' Б';
+    if (b < 1024*1024) return (b/1024).toFixed(1) + ' КБ';
+    if (b < 1024*1024*1024) return (b/(1024*1024)).toFixed(1) + ' МБ';
+    return (b/(1024*1024*1024)).toFixed(2) + ' ГБ';
+  }
+  function fmtSpeed(s) { return !s ? '—' : fmtBytes(s) + '/с'; }
+
+  function renderDownloads() {
+    const items = Array.from(downloadItems.values());
+    const active = items.filter(i => i.state === 'progressing').length;
+    if (active > 0) {
+      dlBadge.textContent = active;
+      dlBadge.classList.add('show');
+      dlBtn.classList.add('has-active');
+    } else {
+      dlBadge.classList.remove('show');
+      dlBtn.classList.remove('has-active');
+    }
+    if (items.length === 0) {
+      dlList.innerHTML = '<div class="dl-empty">Пока ничего не скачано</div>';
+      return;
+    }
+    dlList.innerHTML = '';
+    items.slice().reverse().forEach(it => {
+      const el = document.createElement('div');
+      el.className = 'dl-item';
+      const total = it.totalBytes || 0;
+      const received = it.receivedBytes || 0;
+      const percent = total > 0 ? Math.min(100, (received / total) * 100) : 0;
+      let statusHtml = '';
+      if (it.state === 'progressing') {
+        statusHtml = `<div class="dl-bar"><div class="dl-bar-fill" style="width:${percent}%"></div></div>`;
+      }
+      let metaRight = '';
+      if (it.state === 'progressing') metaRight = `${fmtBytes(received)} / ${fmtBytes(total)} • ${fmtSpeed(it.speed)}`;
+      else if (it.state === 'done') metaRight = `<span class="dl-status-done">✓ ${fmtBytes(received)}</span>`;
+      else if (it.state === 'error') metaRight = `<span class="dl-status-error">✕ Ошибка</span>`;
+      el.innerHTML = `
+        <div class="dl-name" title="${esc(it.filename)}">${esc(it.filename)}</div>
+        ${statusHtml}
+        <div class="dl-meta">
+          <span>${it.state === 'progressing' ? percent.toFixed(0) + '%' : (it.state === 'done' ? 'Готово' : 'Прервано')}</span>
+          <span>${metaRight}</span>
+        </div>
+        <div class="dl-actions">
+          ${it.state === 'progressing' ? `<button class="dl-cancel" data-cancel="${it.id}">Отменить</button>` : ''}
+          ${it.state === 'done' ? `<button data-open="${esc(it.savePath)}">Открыть</button><button data-folder="${esc(it.savePath)}">В папке</button>` : ''}
+        </div>
+      `;
+      dlList.appendChild(el);
+    });
+    dlList.querySelectorAll('[data-cancel]').forEach(btn => {
+      btn.addEventListener('click', () => window.openru.cancelDownload(Number(btn.dataset.cancel)));
+    });
+    dlList.querySelectorAll('[data-open]').forEach(btn => {
+      btn.addEventListener('click', () => window.openru.openDownload(btn.dataset.open));
+    });
+    dlList.querySelectorAll('[data-folder]').forEach(btn => {
+      btn.addEventListener('click', () => window.openru.showInFolder(btn.dataset.folder));
+    });
+  }
+
+  dlClear.addEventListener('click', async () => {
+    const items = Array.from(downloadItems.values());
+    const active = items.filter(i => i.state === 'progressing');
+    if (active.length > 0 && !confirm('Есть активные загрузки. Очистить список?')) return;
+    downloadItems.clear();
+    await window.openru.clearDownloads();
+    renderDownloads();
+  });
+
+  window.openru.onDownloadStarted((data) => {
+    downloadItems.set(data.id, { ...data, receivedBytes: 0, speed: 0, state: 'progressing' });
+    renderDownloads();
+    if (!dlPop.classList.contains('show')) dlPop.classList.add('show');
+  });
+  window.openru.onDownloadProgress((data) => {
+    const it = downloadItems.get(data.id);
+    if (!it) return;
+    it.receivedBytes = data.receivedBytes;
+    it.totalBytes = data.totalBytes;
+    it.speed = data.speed;
+    it.state = data.state === 'error' ? 'error' : 'progressing';
+    renderDownloads();
+  });
+  window.openru.onDownloadDone((data) => {
+    const it = downloadItems.get(data.id);
+    if (!it) return;
+    it.state = 'done';
+    it.savePath = data.savePath;
+    renderDownloads();
+  });
+  window.openru.onDownloadError((data) => {
+    const it = downloadItems.get(data.id);
+    if (!it) return;
+    it.state = 'error';
+    renderDownloads();
+  });
+
+  // ==== НОВЫЕ ВКЛАДКИ ИЗ ГЛАВНОГО ПРОЦЕССА ====
+  if (window.openru.onOpenInNewTab) {
+    window.openru.onOpenInNewTab((url) => createTab(url));
+  }
+
+  // ==== РАСШИРЕНИЯ ====
+  const extBtn = document.getElementById('extBtn');
+  const extPop = document.getElementById('extPop');
+  const extListEl = document.getElementById('extList');
+  const extStatus = document.getElementById('extStatus');
+
+  function extMsg(text, bad) {
+    extStatus.textContent = text || '';
+    extStatus.classList.toggle('show', !!text);
+    extStatus.classList.toggle('bad', !!bad);
+  }
+  async function renderExt() {
+    let list = [];
+    try { list = await window.openru.extList(); } catch (e) {}
+    extBtn.classList.toggle('ext-on', list.some(x => x.enabled && !x.error));
+    if (!list.length) {
+      extListEl.innerHTML = '<div class="dl-empty">Расширений пока нет.<br>Добавьте папку с manifest.json или файл .crx / .zip.</div>';
+      return;
+    }
+    extListEl.innerHTML = list.map(x => `
+      <div class="dl-item" data-p="${esc(x.path)}">
+        <div class="ext-top">
+          <div class="ext-meta">
+            <div class="dl-name" title="${esc(x.path)}">${esc(x.name || '')}<span class="ext-ver">${x.version ? 'v' + esc(x.version) : ''}</span></div>
+            <div class="ext-desc">${esc(x.description || (x.packed ? 'Упакованное расширение' : 'Распакованное расширение'))}</div>
+          </div>
+          <label class="sw" title="Включить / выключить"><input type="checkbox" data-act="toggle" ${x.enabled ? 'checked' : ''}><span></span></label>
+        </div>
+        ${x.error ? `<div class="ext-warn">${esc(x.error)}</div>` : (x.swOnly && x.enabled ? '<div class="ext-warn">MV3 со service worker: Electron его не запускает, фоновая часть может не работать.</div>' : '')}
+        <div class="dl-actions">
+          ${x.enabled && x.popup ? '<button data-act="popup">Открыть popup</button>' : ''}
+          ${x.enabled && x.options ? '<button data-act="options">Настройки</button>' : ''}
+          <button class="dl-cancel" data-act="remove">Удалить</button>
+        </div>
+      </div>`).join('');
+  }
+  async function addExt(kind) {
+    extMsg('');
+    const r = await (kind === 'dir' ? window.openru.extAddUnpacked() : window.openru.extAddPacked());
+    if (r.canceled) return;
+    if (!r.ok) extMsg(r.error, true);
+    else extMsg(r.warn ? 'Добавлено, но не загрузилось: ' + r.warn : 'Расширение добавлено. Обновите открытые вкладки.', !!r.warn);
+    renderExt();
+  }
+  document.getElementById('extAddDir').addEventListener('click', () => addExt('dir'));
+  document.getElementById('extAddFile').addEventListener('click', () => addExt('file'));
+  extBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dlPop.classList.remove('show');
+    extPop.classList.toggle('show');
+    if (extPop.classList.contains('show')) { extMsg(''); renderExt(); }
+  });
+  dlBtn.addEventListener('click', () => extPop.classList.remove('show'));
+  document.addEventListener('click', (e) => {
+    if (!extPop.contains(e.target) && !extBtn.contains(e.target)) extPop.classList.remove('show');
+  });
+  extListEl.addEventListener('change', async (e) => {
+    const row = e.target.closest('[data-p]');
+    if (!row || e.target.dataset.act !== 'toggle') return;
+    await window.openru.extToggle(row.dataset.p, e.target.checked);
+    extMsg(e.target.checked ? 'Включено. Обновите открытые вкладки.' : 'Выключено.');
+    renderExt();
+  });
+  extListEl.addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-act]');
+    const row = e.target.closest('[data-p]');
+    if (!b || !row) return;
+    if (b.dataset.act === 'remove') {
+      if (!confirm('Удалить расширение?')) return;
+      await window.openru.extRemove(row.dataset.p);
+      extMsg('Расширение удалено.');
+      renderExt();
+    } else if (b.dataset.act === 'popup') {
+      extPop.classList.remove('show');
+      openExtPopup(row.dataset.p);           // popup поверх текущей страницы
+    } else {
+      extPop.classList.remove('show');
+      window.openru.extOpenPage(row.dataset.p, b.dataset.act);
+    }
+  });
+  renderExt();
+
+  // ==== ВЫБОР ПОИСКОВИКА / ИИ ПОД АДРЕСНОЙ СТРОКОЙ ====
+  const omniPop = document.getElementById('omniPop');
+  const omniTitle = document.getElementById('omniTitle');
+  const omniEngines = document.getElementById('omniEngines');
+  const omniAi = document.getElementById('omniAi');
+  const omniHint = document.getElementById('omniHint');
+
+  function activeTabObj() { return tabs.find(x => x.id === activeId); }
+
+  // то, что пользователь именно набрал (а не адрес текущей страницы)
+  function typedQuery() {
+    const v = urlInput.value.trim();
+    const t = activeTabObj();
+    if (!v || (t && v === shownUrl(t.url))) return '';
+    return v;
+  }
+
+  function makeOmniChip(item, title) {
+    const chip = document.createElement('div');
+    chip.className = 'omni-chip';
+    chip.title = title || item.name;
+    chip.dataset.id = item.id;
+    const ico = document.createElement('span');
+    ico.className = 'omni-ico';
+    ico.textContent = item.name[0];
+    const label = document.createElement('span');
+    label.textContent = item.name;
+    chip.append(ico, label);
+    const img = new Image();
+    img.alt = '';
+    img.onload = () => {
+      if (img.naturalWidth > 1 && img.naturalHeight > 1) { ico.textContent = ''; ico.appendChild(img); }
+    };
+    img.src = window.orsFavicon(item.domain);
+    return chip;
+  }
+
+  function buildOmni() {
+    ORS_ENGINES.forEach(e => {
+      const chip = makeOmniChip(e, e.name + ' · ' + e.region);
+      chip.addEventListener('click', () => omniPickEngine(e));
+      omniEngines.appendChild(chip);
+    });
+    ORS_AI.forEach(ai => {
+      const hint = typeof ai.url === 'function' ? ai.name : ai.name + ' — запрос будет скопирован, вставьте его через Ctrl+V';
+      const chip = makeOmniChip(ai, hint);
+      chip.addEventListener('click', () => omniPickAI(ai));
+      omniAi.appendChild(chip);
+    });
+  }
+
+  function refreshOmni() {
+    const q = typedQuery();
+    omniTitle.textContent = q ? 'Искать «' + (q.length > 40 ? q.slice(0, 40) + '…' : q) + '» в:' : 'Искать в:';
+    const cur = currentEngine().id;
+    omniEngines.querySelectorAll('.omni-chip').forEach(c => c.classList.toggle('active', c.dataset.id === cur));
+    omniHint.textContent = q
+      ? 'Нажмите на поисковик или ИИ — запрос откроется в нём. Enter — поиск в выделенном поисковике.'
+      : 'Введите запрос и выберите, где его искать. Нажатие без запроса делает поисковик основным.';
+  }
+  function openOmniPop() { refreshOmni(); omniPop.classList.add('show'); }
+  function closeOmniPop() { omniPop.classList.remove('show'); }
+
+  function omniPickEngine(e) {
+    const q = typedQuery();
+    if (!q) {                                   // без запроса — просто выбираем основной поисковик
+      try { localStorage.setItem('ors_selected_engine', e.id); } catch (err) {}
+      refreshOmni();
+      return;
+    }
+    closeOmniPop();
+    urlInput.blur();
+    const t = activeTabObj();
+    if (t) t.webview.loadURL(e.url(encodeURIComponent(q)));
+  }
+  function omniPickAI(ai) {
+    const target = window.orsAiTarget(ai, typedQuery());
+    const tab = activeTabObj();
+    const go = () => { if (tab) tab.webview.loadURL(target.url); };
+    closeOmniPop();
+    urlInput.blur();
+    if (target.copy) {
+      try { navigator.clipboard.writeText(target.copy).then(() => setTimeout(go, 120), go); }
+      catch (err) { go(); }
+    } else go();
+  }
+
+  urlInput.addEventListener('click', openOmniPop);
+  urlInput.addEventListener('input', openOmniPop);
+  urlInput.addEventListener('blur', closeOmniPop);
+  urlInput.addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'Enter') closeOmniPop(); });
+  omniPop.addEventListener('mousedown', (e) => e.preventDefault());   // клик по списку не снимает фокус со строки
+  buildOmni();
+
+  // ==== POPUP РАСШИРЕНИЯ ПОВЕРХ СТРАНИЦЫ ====
+  const extFrame = document.getElementById('extPopupFrame');
+  const extBackdrop = document.getElementById('extBackdrop');
+  let extPopupWv = null;
+  let extPopupTimer = null;
+  let extPopupSize = [360, 240];
+
+  function placeExtPopup(w, h) {
+    const r = extBtn.getBoundingClientRect();
+    const W = Math.max(200, Math.min(800, Math.round(w)));
+    const maxH = Math.max(100, window.innerHeight - r.bottom - 20);
+    const H = Math.min(Math.max(100, Math.min(600, Math.round(h))), maxH);
+    let left = Math.round(r.right - W);
+    left = Math.max(8, Math.min(left, window.innerWidth - W - 8));
+    extFrame.style.left = left + 'px';
+    extFrame.style.top = Math.round(r.bottom + 8) + 'px';
+    extFrame.style.width = W + 'px';
+    extFrame.style.height = H + 'px';
+    extPopupSize = [W, H];
+  }
+
+  // Подгоняем размер окна под содержимое popup (как это делает Chrome, максимум 800x600)
+  async function measureExtPopup() {
+    if (!extPopupWv) return;
+    try {
+      const r = await extPopupWv.executeJavaScript(`(() => {
+        const b = document.body; if (!b) return null;
+        const cs = getComputedStyle(b);
+        const mx = (parseFloat(cs.marginLeft) || 0) + (parseFloat(cs.marginRight) || 0);
+        const my = (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
+        return [Math.ceil(Math.max(b.scrollWidth, b.offsetWidth) + mx), Math.ceil(Math.max(b.scrollHeight, b.offsetHeight) + my)];
+      })()`);
+      if (!r || !r[0] || !r[1]) return;
+      if (r[0] !== extPopupSize[0] || r[1] !== extPopupSize[1]) placeExtPopup(r[0], r[1]);
+    } catch (e) { /* страница ещё грузится */ }
+  }
+
+  async function openExtPopup(extPath) {
+    let url = null;
+    try { url = await window.openru.extPageUrl(extPath, 'popup'); } catch (e) {}
+    if (!url) return;
+    closeExtPopup();
+    const wv = document.createElement('webview');
+    wv.setAttribute('allowpopups', '');
+    wv.src = url;
+    extFrame.appendChild(wv);
+    extPopupWv = wv;
+    placeExtPopup(360, 240);
+    extFrame.classList.add('show');
+    extBackdrop.classList.add('show');
+    wv.addEventListener('dom-ready', measureExtPopup);
+    wv.addEventListener('did-stop-loading', measureExtPopup);
+    wv.addEventListener('close', closeExtPopup);          // popup вызвал window.close()
+    extPopupTimer = setInterval(measureExtPopup, 400);
+  }
+
+  function closeExtPopup() {
+    clearInterval(extPopupTimer);
+    extPopupTimer = null;
+    if (extPopupWv) { extPopupWv.remove(); extPopupWv = null; }
+    extFrame.classList.remove('show');
+    extBackdrop.classList.remove('show');
+  }
+
+  extBackdrop.addEventListener('mousedown', closeExtPopup);   // клик вне popup закрывает его
+  window.addEventListener('resize', () => { if (extPopupWv) placeExtPopup(extPopupSize[0], extPopupSize[1]); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && extPopupWv) closeExtPopup(); });
+
+  // ==== СТАРТ ====
+  createTab();
+</script>
+</body>
+</html>

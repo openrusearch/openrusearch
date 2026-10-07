@@ -1,0 +1,36 @@
+{
+  "name": "openru-search",
+  "version": "1.0.0",
+  "description": "Open RU Search — браузер-лаунчер",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "author": "Artem",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "ru.openru.search",
+    "productName": "Open RU Search",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "start.html",
+      "Nonet.html",
+      "engines.js",
+      "favicon.ico"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "favicon.ico"
+    }
+  }
+}

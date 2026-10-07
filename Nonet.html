@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Нет подключения к интернету</title>
+<style>
+  :root {
+    --bg:#0E1013; --surface:#1B1F26; --surface-2:#242A33; --line:#2A303A;
+    --text:#E8EBF0; --muted:#8A93A3; --accent:#5B8CFF; --accent-2:#7AD7FF;
+    --danger:#FF6B57; --ok:#3DDC97; --warn:#FFB454;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; }
+  body {
+    font-family:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background:
+      radial-gradient(900px 500px at 50% -10%, rgba(91,140,255,.14), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+    overflow:auto;
+  }
+  .card {
+    width:100%; max-width:560px;
+    text-align:center;
+    animation:rise .5s var(--ease) both;
+  }
+  @keyframes rise { from { opacity:0; transform:translateY(14px); } }
+
+  /* ---- иконка ---- */
+  .icon { width:132px; height:132px; margin:0 auto 22px; position:relative; }
+  .icon svg { width:100%; height:100%; overflow:visible; }
+  .arc { fill:none; stroke:var(--muted); stroke-width:6; stroke-linecap:round; opacity:.9; }
+  .arc.a2 { animation:blink 2.4s ease-in-out infinite; }
+  .arc.a3 { animation:blink 2.4s ease-in-out .3s infinite; }
+  .dot { fill:var(--muted); }
+  .slash { fill:none; stroke:var(--danger); stroke-width:6; stroke-linecap:round;
+           stroke-dasharray:110; stroke-dashoffset:110; animation:draw .7s .25s var(--ease) forwards; }
+  @keyframes draw { to { stroke-dashoffset:0; } }
+  @keyframes blink { 0%,100% { opacity:.9; } 50% { opacity:.25; } }
+  .card.back .arc { stroke:var(--ok); animation:none; opacity:1; }
+  .card.back .dot { fill:var(--ok); }
+  .card.back .slash { display:none; }
+
+  h1 { font-size:26px; font-weight:700; letter-spacing:-.2px; margin-bottom:10px; }
+  .lead { color:var(--muted); font-size:14.5px; line-height:1.55; margin-bottom:6px; }
+  .target {
+    display:inline-block; max-width:100%;
+    margin:6px 0 0; padding:6px 12px;
+    font-size:12.5px; color:var(--muted);
+    background:var(--surface); border:1px solid var(--line); border-radius:999px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    vertical-align:top;
+  }
+  .target:empty { display:none; }
+
+  /* ---- статус ---- */
+  .status {
+    display:inline-flex; align-items:center; gap:9px;
+    margin:22px 0 20px;
+    font-size:13px; color:var(--muted);
+  }
+  .pulse { width:9px; height:9px; border-radius:50%; background:var(--warn); position:relative; }
+  .pulse::after {
+    content:""; position:absolute; inset:-5px; border-radius:50%;
+    border:2px solid var(--warn); opacity:0; animation:ping 1.8s ease-out infinite;
+  }
+  @keyframes ping { 0% { transform:scale(.5); opacity:.7; } 100% { transform:scale(1.5); opacity:0; } }
+  .status.ok { color:var(--ok); }
+  .status.ok .pulse { background:var(--ok); }
+  .status.ok .pulse::after { border-color:var(--ok); }
+  .status.bad { color:var(--danger); }
+  .status.bad .pulse { background:var(--danger); }
+  .status.bad .pulse::after { border-color:var(--danger); }
+
+  /* ---- кнопки ---- */
+  .actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:28px; }
+  button, .btn {
+    font-family:inherit; font-size:14px; font-weight:600;
+    padding:11px 22px; border-radius:12px; border:1px solid var(--line);
+    background:var(--surface-2); color:var(--text); cursor:pointer; text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:background .15s, border-color .15s, transform .15s;
+  }
+  button:hover, .btn:hover { background:#2F3743; border-color:var(--accent); }
+  button:active, .btn:active { transform:scale(.97); }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.primary:hover { background:#4C7DF0; }
+  button[disabled] { opacity:.65; cursor:default; pointer-events:none; }
+  .spin { width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff;
+          animation:rot .7s linear infinite; display:none; }
+  button.loading .spin { display:inline-block; }
+  @keyframes rot { to { transform:rotate(360deg); } }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* ---- советы ---- */
+  .tips {
+    text-align:left; background:var(--surface); border:1px solid var(--line);
+    border-radius:16px; padding:16px 20px;
+  }
+  .tips h2 { font-size:12px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .tips ul { list-style:none; display:grid; gap:8px; }
+  .tips li { font-size:13.5px; line-height:1.45; padding-left:22px; position:relative; color:#C9CFDA; }
+  .tips li::before {
+    content:""; position:absolute; left:2px; top:7px; width:7px; height:7px; border-radius:50%;
+    background:var(--accent);
+  }
+
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<main class="card" id="card">
+  <div class="icon" aria-hidden="true">
+    <svg viewBox="0 0 120 120">
+      <path class="arc a3" d="M14 46 A64 64 0 0 1 106 46"/>
+      <path class="arc a2" d="M30 63 A40 40 0 0 1 90 63"/>
+      <path class="arc"    d="M46 80 A17 17 0 0 1 74 80"/>
+      <circle class="dot" cx="60" cy="95" r="5.5"/>
+      <path class="slash" d="M20 18 L100 104"/>
+    </svg>
+  </div>
+
+  <h1 id="title">Нет подключения к интернету</h1>
+  <p class="lead" id="lead">Не удалось открыть страницу. Проверьте соединение — как только сеть появится, страница загрузится сама.</p>
+  <div class="target" id="target" title=""></div>
+
+  <div class="status" id="status" role="status" aria-live="polite">
+    <span class="pulse"></span><span id="statusText">Ожидаем подключение…</span>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="retry" type="button">
+      <span class="spin"></span><span id="retryText">Повторить</span>
+    </button>
+    <a class="btn" id="home" href="start.html">На стартовую</a>
+  </div>
+
+  <section class="tips">
+    <h2>Что можно проверить</h2>
+    <ul>
+      <li>Включён ли Wi-Fi и подключён ли сетевой кабель.</li>
+      <li>Не включён ли режим «в самолёте».</li>
+      <li>Перезагрузите роутер, если другие устройства тоже без интернета.</li>
+      <li>Проверьте настройки прокси и VPN — они могут блокировать соединение.</li>
+    </ul>
+  </section>
+</main>
+
+<script>
+(function () {
+  // Адрес, который не удалось открыть, передаётся параметром ?u=...
+  var params = new URLSearchParams(location.search);
+  var raw = params.get('u') || '';
+  // разрешаем возвращаться только на http(s)-адреса
+  var target = /^https?:\/\//i.test(raw) ? raw : '';
+
+  var card = document.getElementById('card');
+  var targetEl = document.getElementById('target');
+  var statusEl = document.getElementById('status');
+  var statusText = document.getElementById('statusText');
+  var retryBtn = document.getElementById('retry');
+  var retryText = document.getElementById('retryText');
+  var title = document.getElementById('title');
+  var lead = document.getElementById('lead');
+
+  if (target) { targetEl.textContent = target; targetEl.title = target; }
+  else { retryText.textContent = 'Проверить соединение'; }
+
+  var PROBES = [
+    'https://www.gstatic.com/generate_204',
+    'https://yandex.ru/favicon.ico',
+    'https://www.cloudflare.com/cdn-cgi/trace'
+  ];
+  var busy = false, redirected = false;
+
+  function probeOne(url) {
+    return new Promise(function (resolve) {
+      var ctrl = new AbortController();
+      var t = setTimeout(function () { ctrl.abort(); }, 4000);
+      fetch(url, { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal })
+        .then(function () { clearTimeout(t); resolve(true); })
+        .catch(function () { clearTimeout(t); resolve(false); });
+    });
+  }
+  // true — интернет есть (достаточно, чтобы ответил любой из адресов)
+  function isOnline() {
+    if (navigator.onLine === false) return Promise.resolve(false);
+    return Promise.all(PROBES.map(probeOne)).then(function (r) { return r.some(Boolean); });
+  }
+
+  function setStatus(kind, text) {
+    statusEl.className = 'status' + (kind ? ' ' + kind : '');
+    statusText.textContent = text;
+  }
+
+  function goBack() {
+    if (redirected) return;
+    redirected = true;
+    card.classList.add('back');
+    title.textContent = 'Соединение восстановлено';
+    lead.textContent = target ? 'Загружаем страницу…' : 'Интернет снова работает.';
+    setStatus('ok', 'Подключено');
+    if (target) setTimeout(function () { location.replace(target); }, 450);
+    else setTimeout(function () { location.replace('start.html'); }, 900);
+  }
+
+  function check(manual) {
+    if (busy || redirected) return;
+    busy = true;
+    if (manual) { retryBtn.classList.add('loading'); retryBtn.disabled = true; setStatus('', 'Проверяем соединение…'); }
+    isOnline().then(function (ok) {
+      busy = false;
+      retryBtn.classList.remove('loading'); retryBtn.disabled = false;
+      if (ok) goBack();
+      else setStatus(manual ? 'bad' : '', manual ? 'Соединения по-прежнему нет' : 'Ожидаем подключение…');
+    });
+  }
+
+  retryBtn.addEventListener('click', function () { check(true); });
+  window.addEventListener('online', function () { check(false); });
+  window.addEventListener('offline', function () { setStatus('', 'Ожидаем подключение…'); });
+  // тихая автопроверка каждые 5 секунд
+  setInterval(function () { check(false); }, 5000);
+  // и сразу после открытия страницы
+  setTimeout(function () { check(false); }, 1200);
+})();
+</script>
+</body>
+</html>
