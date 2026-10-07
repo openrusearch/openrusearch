@@ -690,6 +690,17 @@
     align-items:center;
     position:relative;
     z-index:1;
+    transition:opacity .25s ease, transform .25s ease, max-height .3s ease, margin .3s ease;
+    max-height:200px;
+    opacity:1;
+    overflow:hidden;
+  }
+  .quick-row.hidden-by-focus{
+    opacity:0;
+    transform:translateY(-8px);
+    max-height:0;
+    margin-top:0;
+    pointer-events:none;
   }
   .quick-row span{
     background:var(--pin-bg);
@@ -2018,6 +2029,17 @@
     });
     pinnedRow.appendChild(pencilBtn);
   }
+
+  /* ====== Скрытие закреплённых при фокусе на поле поиска ====== */
+  function hidePinnedForFocus(){
+    pinnedRow.classList.add('hidden-by-focus');
+  }
+  function showPinnedAfterFocus(){
+    pinnedRow.classList.remove('hidden-by-focus');
+  }
+
+  input.addEventListener('focus', hidePinnedForFocus);
+  input.addEventListener('blur', showPinnedAfterFocus);
 
   /* ====== Режим ====== */
   let mode = 'normal';
