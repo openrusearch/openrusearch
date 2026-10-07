@@ -84,15 +84,17 @@ html.dark pre .st{color:#7dd3fc}html.dark pre .nu{color:#c4b5fd}html.dark pre .f
   <div class="layout">
     <aside class="sidebar">
       <div class="side-group"><p class="side-title">Сайт</p><a class="side-link" href="https://openrusearch.github.io/openrusearch/">1. Сайт</a></div>
-      <div class="side-group"><p class="side-title">Начало работы</p><a class="side-link" href="https://openrusearch.github.io/openrusearch/g1.html">1. Введение</a></div>
+      <div class="side-group"><p class="side-title">Начало работы</p><a class="side-link" href="https://openrusearch.github.io/openrusearch/g1.html">1. Введение</a>
+              <a class="side-link" href="https://openrusearch.github.io/openrusearch/docsapp">2. Приложение</a></div>
     </aside>
     <main class="content">
       <h1>Быстрый старт</h1>
       <p class="desc">https://github.com/openrusearch/openrusearch</p>
 <h2 id="введение">Введение</h2>
-<p>Введение<br>Open Ru Search — это одностраничный веб-браузер-лаунчер для поиска в мировом интернете, оформленный как самостоятельное приложение. Он не является поисковой системой и не хранит поисковые базы — это «надстройка» над выбранными поисковиками, которая помогает быстро отправить запрос в нужную систему.<br>Создан в 2026 году. Автор — ARTEMPRO01MINETEXNICK.</p>
-<div class="custom-block tip"><p class="title">https://openrusearch.github.io/openrusearch/</p></div>
-<p>Open Ru Search — это именно лаунчер, а не отдельная поисковая база.</p>
+<p><strong>Open Ru Search</strong> — это одностраничный веб-браузер-лаунчер для поиска в мировом интернете, оформленный как самостоятельное приложение. Он не является поисковой системой и не хранит поисковые базы — это «надстройка» над выбранными поисковиками, которая помогает быстро отправить запрос в нужную систему.</p>
+<p>Создан в 2026 году. Автор — <strong>ARTEMPRO01MINETEXNICK</strong>.</p>
+<p>https://openrusearch.github.io/openrusearch/</p>
+<blockquote><p>Open Ru Search — это именно лаунчер, а не отдельная поисковая база.</p></blockquote>
 
 
     </main>
@@ -109,12 +111,10 @@ html.dark pre .st{color:#7dd3fc}html.dark pre .nu{color:#c4b5fd}html.dark pre .f
   var SELF="https://github.com/openrusearch/openrusearch";
   var TITLE="Быстрый старт";
   function esc(s){var map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'};return String(s==null?'':s).replace(/[&<>"]/g,function(c){return map[c];});}
-  function norm(s){return String(s||"").replace(/s+/g," ").trim().toLowerCase();}
+  function norm(s){return String(s||"").replace(/\s+/g," ").trim().toLowerCase();}
   function parseList(text){
     var items=[];
-    text.split(/
-?
-/).forEach(function(raw){
+    text.split(/\r?\n/).forEach(function(raw){
       var line=(raw||"").trim();
       if(!line||line.charAt(0)==="#")return;
       var cat="";
@@ -124,26 +124,26 @@ html.dark pre .st{color:#7dd3fc}html.dark pre .nu{color:#c4b5fd}html.dark pre .f
         while(true){
           var p=low.indexOf(kw[k],from);
           if(p===-1)break;
-          var beforeOk=p===0||/s/.test(line.charAt(p-1));
+          var beforeOk=p===0||/\s/.test(line.charAt(p-1));
           var afterPos=p+kw[k].length;
-          var afterOk=afterPos>=line.length||/s/.test(line.charAt(afterPos));
+          var afterOk=afterPos>=line.length||/\s/.test(line.charAt(afterPos));
           if(beforeOk&&afterOk)idx=p;
           from=p+kw[k].length;
         }
         if(idx>-1){
-          var name=line.slice(idx+kw[k].length).replace(/^[s:=]+/,"").trim();
+          var name=line.slice(idx+kw[k].length).replace(/^[\s:=]+/,"").trim();
           if(name){cat=name;line=line.slice(0,idx).trim();}
-          else{line=line.slice(0,idx).replace(/[:=]s*$/,"").trim();}
+          else{line=line.slice(0,idx).replace(/[:=]\s*$/,"").trim();}
           break;
         }
       }
-      if(!cat&&line.indexOf("|")>-1){var p=line.split("|");line=(p[0]||"").trim();cat=(p[1]||"").replace(/^[:=]s*/,"").trim();}
-      var m=line.match(/^(d+)s*[.)]?s*(.+?)(?:s+|s*[:=]s*)(https?://S+|/S+|[a-z0-9][w.-/]*.html?)s*$/i);
+      if(!cat&&line.indexOf("|")>-1){var p=line.split("|");line=(p[0]||"").trim();cat=(p[1]||"").replace(/^[:=]\s*/,"").trim();}
+      var m=line.match(/^(\d+)\s*[.)]?\s*(.+?)(?:\s+|\s*[:=]\s*)(https?:\/\/\S+|\/\S+|[a-z0-9][\w.\-/]*\.html?)\s*$/i);
       if(m){items.push({num:m[1],title:m[2].trim(),url:m[3],cat:cat});return;}
-      var parts=line.split(/s+/);
-      if(/^d+$/.test(parts[0])){
+      var parts=line.split(/\s+/);
+      if(/^\d+$/.test(parts[0])){
         var num=parts.shift(),url="";
-        if(parts.length&&/(^https?://)|.w{2,}$/i.test(parts[parts.length-1]))url=parts.pop();
+        if(parts.length&&/(^https?:\/\/)|\.\w{2,}$/i.test(parts[parts.length-1]))url=parts.pop();
         items.push({num:num,title:parts.join(" "),url:url||"#",cat:cat});
       }else if(parts.length>=2){
         items.push({num:String(items.length+1),title:parts[0],url:parts.slice(1).join(" "),cat:cat});
@@ -171,7 +171,7 @@ html.dark pre .st{color:#7dd3fc}html.dark pre .nu{color:#c4b5fd}html.dark pre .f
         return '<div class="side-group"><p class="side-title">'+esc(g.t)+"</p>"+g.items.map(function(a,i){return link(a,i+1);}).join("")+"</div>";
       }).join("");
     }else{
-      html='<div class="side-group"><p class="side-title">Статьи · Open RU Search</p>'+items.map(function(a,i){return link(a,i+1);}).join("")+"</div>";
+      html='<div class="side-group"><p class="side-title">Статьи · OPEN RU SEARCH</p>'+items.map(function(a,i){return link(a,i+1);}).join("")+"</div>";
     }
     side.innerHTML=html;
     // prev/next по актуальному списку
@@ -186,17 +186,31 @@ html.dark pre .st{color:#7dd3fc}html.dark pre .nu{color:#c4b5fd}html.dark pre .f
   }
   function loadList(){
     var side=document.querySelector(".sidebar");
-    if(side)side.innerHTML='<div class="side-group"><p class="side-title">Статьи · Open RU Search</p><p class="side-loading">⏳ Загрузка списка…</p></div>';
+    if(side)side.innerHTML='<div class="side-group"><p class="side-title">Статьи · OPEN RU SEARCH</p><p class="side-loading">⏳ Загрузка списка…</p></div>';
     if(!GIST_URL)return;
-    fetch(GIST_URL,{cache:"no-store"}).then(function(r){
-      if(!r.ok)throw new Error("HTTP "+r.status);
-      return r.text();
-    }).then(function(t){
-      var items=parseList(t);
-      if(items.length)renderSide(items);
-    }).catch(function(){/* список уже на месте (встроен в страницу) — тихо оставляем его */});
+    // всегда обновляем список при каждом заходе: cache:"no-store" — без кэша браузера,
+    // + параметр _t (счётчик попыток) — против кэширования CDN GitHub
+    var attempt=0;
+    function doFetch(){
+      attempt++;
+      var u=GIST_URL+(GIST_URL.indexOf("?")>-1?"&":"?")+"_t="+Date.now()+"_"+attempt;
+      fetch(u,{cache:"no-store"}).then(function(r){
+        if(!r.ok)throw new Error("HTTP "+r.status);
+        return r.text();
+      }).then(function(t){
+        var items=parseList(t);
+        if(items.length){renderSide(items);}
+        else if(attempt<3){setTimeout(doFetch,600);} // файл пуст/не распознан — повторим
+      }).catch(function(e){
+        if(attempt<3){setTimeout(doFetch,600);return;} // сеть/CDN сглючили — повторная попытка
+        // все попытки исчерпаны: показываем встроенный fallback-список (если он есть)
+        if(FALLBACK&&FALLBACK.length){renderSide(FALLBACK);}
+        else if(side){side.innerHTML='<div class="side-group"><p class="side-title">Статьи · OPEN RU SEARCH</p><p class="side-loading">⚠ Не удалось загрузить список. <a href="'+esc(GIST_URL)+'" target="_blank" rel="noopener">Открыть gistfile1.txt ↗</a></p></div>';}
+      });
+    }
+    doFetch();
   }
-  loadList();
+  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",loadList);}else{loadList();}
   document.querySelectorAll(".copy").forEach(function(b){
     b.addEventListener("click",function(){
       var pre=b.closest(".code-block").querySelector("pre");
